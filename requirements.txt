@@ -1,0 +1,9 @@
+opencv-python
+numpy~=1.18.5
+pandas~=1.0.5
+scipy~=1.5.2
+scikit-learn~=0.23.2
+torchvision
+matplotlib~=3.2.2
+torch>=1.6
+tensorboard
