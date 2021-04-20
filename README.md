@@ -2,7 +2,7 @@
 Official PyTorch implementation for ["Mixed supervision for surface-defect detection: from weakly to fully supervised learning"](http://prints.vicos.si/publications/385) published in journal Computers in Industry 2021.
 
 ## Citation
-Please cite Computers in Industry 2021 paper:
+Please cite our [Computers in Industry 2021 paper](http://prints.vicos.si/publications/385) when using this code:
 
 ```
 @article{Bozic2021COMIND,
