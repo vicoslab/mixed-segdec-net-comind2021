@@ -1,5 +1,5 @@
-# End-to-end training of a two-stage neural network for defect detection
-Official PyTorch implementation for "Mixed supervision for surface-defect detection: from weakly to fully supervised learning"
+# Mixed supervision for surface-defect detection: from weakly to fully supervised learning [Computers in Industry 2021]
+Official PyTorch implementation for ["Mixed supervision for surface-defect detection: from weakly to fully supervised learning"](http://prints.vicos.si/publications/385) published in journal Computers in Industry 2021.
 
 ## Citation
 Please cite Computers in Industry 2021 paper:
@@ -57,7 +57,7 @@ To replicate the results published in the paper run:
 # or by specifying multiple GPU ids 
 ./EXPERIMENTS_COMIND.sh 0 1 2
 ```
-To replicate the results from 2020 ICPR paper: 
+To replicate the results from [ICPR 2020 paper](http://prints.vicos.si/publications/383): 
 ```
 @misc{Bozic2020ICPR,
     title={End-to-end training of a two-stage neural network for defect detection},
