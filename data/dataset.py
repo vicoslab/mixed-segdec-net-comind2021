@@ -21,10 +21,8 @@ class Dataset(torch.utils.data.Dataset):
     def init_extra(self):
         self.counter = 0
         self.neg_imgs_permutation = np.random.permutation(self.num_neg)
-        self.pos_imgs_permutation = np.random.permutation(self.num_neg)
 
         self.neg_retrieval_freq = np.zeros(shape=self.num_neg)
-        self.pos_retrieval_freq = np.zeros(shape=self.num_pos)
 
     def __getitem__(self, index) -> (torch.Tensor, torch.Tensor, torch.Tensor, bool, str):
 
@@ -44,7 +42,6 @@ class Dataset(torch.utils.data.Dataset):
             else:
                 self.neg_imgs_permutation = np.random.permutation(self.num_neg)
 
-            self.pos_imgs_permutation = np.random.permutation(self.num_pos)
 
         if self.kind == 'TRAIN':
             if index >= self.num_pos:
@@ -111,7 +108,6 @@ class Dataset(torch.utils.data.Dataset):
         return np.array((lbl / 255.0), dtype=np.float32), np.max(lbl) > 0
 
     def to_tensor(self, x) -> torch.Tensor:
-        # if np.max(x) > 1.0:
         if x.dtype != np.float32:
             x = (x / 255.0).astype(np.float32)
 
@@ -135,7 +131,6 @@ class Dataset(torch.utils.data.Dataset):
 
     def downsize(self, image: np.ndarray, downsize_factor: int = 8) -> np.ndarray:
         img_t = torch.from_numpy(np.expand_dims(image, 0 if len(image.shape) == 3 else (0, 1)).astype(np.float32))
-        # img_t = torch.from_numpy(np.expand_dims(image, 0).astype(np.float32))
         img_t = torch.nn.ReflectionPad2d(padding=(downsize_factor))(img_t)
         image_np = torch.nn.AvgPool2d(kernel_size=2 * downsize_factor + 1, stride=downsize_factor)(img_t).detach().numpy()
         return image_np[0] if len(image.shape) == 3 else image_np[0, 0]
