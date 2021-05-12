@@ -110,7 +110,7 @@ class End2End:
                 total_loss_seg += loss_seg.item()
                 total_loss_dec += loss_dec.item()
 
-                total_correct += (decision > 0.5).item() == is_pos_.item()
+                total_correct += (decision > 0.0).item() == is_pos_.item()
                 loss = weight_loss_seg * loss_seg + weight_loss_dec * loss_dec
             else:
                 loss_dec = criterion_dec(decision, is_pos_)
