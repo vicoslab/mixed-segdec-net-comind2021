@@ -126,7 +126,7 @@ class End2End:
         optimizer.step()
         optimizer.zero_grad()
 
-        return total_loss_seg, total_loss_dec, total_loss_seg + total_loss_dec, total_correct
+        return total_loss_seg, total_loss_dec, total_loss, total_correct
 
     def _train_model(self, device, model, train_loader, criterion_seg, criterion_dec, optimizer, validation_set, tensorboard_writer):
         losses = []
