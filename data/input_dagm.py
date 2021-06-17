@@ -32,8 +32,7 @@ class DagmDataset(Dataset):
             image_path = os.path.join(self.path, sub_dir, image_name)
             image = self.read_img_resize(image_path, self.grayscale, self.image_size)
             img_name_short = image_name[:-4]
-            # seg_mask_path = os.path.join(self.path, sub_dir, "Label",  f"{img_name_short}_label.PNG")
-            seg_mask_path = os.path.join(self.path, sub_dir, f"{img_name_short}_label.PNG")
+            seg_mask_path = os.path.join(self.path, sub_dir, "Label",  f"{img_name_short}_label.PNG")
 
             if os.path.exists(seg_mask_path):
                 seg_mask, _ = self.read_label_resize(seg_mask_path, self.image_size, dilate=self.cfg.DILATE)
