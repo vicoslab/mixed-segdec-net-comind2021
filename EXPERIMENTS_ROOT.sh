@@ -1,14 +1,10 @@
 #!/usr/bin/env bash
 
-#KSDD_PATH="./datasets/KSDD/"
-#DAGM_PATH="./datasets/DAGM/"
-#STEEL_PATH="./datasets/STEEL/"
-#KSDD2_PATH="./datasets/KSDD2/"
+KSDD_PATH="./datasets/KSDD/"
+DAGM_PATH="./datasets/DAGM/"
+STEEL_PATH="./datasets/STEEL/"
+KSDD2_PATH="./datasets/KSDD2/"
 
-KSDD_PATH="/storage/datasets/GOSTOP/RazpokeNaObodu/Dataset2/"
-DAGM_PATH="/storage/datasets/GOSTOP/DAGM/"
-STEEL_PATH="/storage/datasets/GOSTOP/SEVERSTAL_STEEL/"
-KSDD2_PATH="/storage/datasets/GOSTOP/KSDD2/no_dilate/"
 
 train_KSDD()
 {
