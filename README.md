@@ -3,6 +3,17 @@ Official PyTorch implementation for ["Mixed supervision for surface-defect detec
 
 The same code is also an offical implementation of the method used in ["End-to-end training of a two-stage neural network for defect detection"](http://prints.vicos.si/publications/383) published in International Conference on Pattern Recognition 2020.
 
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-shield]][cc-by-nc-sa] 
+
+Code and the dataset are licensed under [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License][cc-by-nc-sa].
+
+[![CC BY-NC-SA 4.0][cc-by-nc-sa-image]][cc-by-nc-sa]
+
+[cc-by-nc-sa]: http://creativecommons.org/licenses/by-nc-sa/4.0/
+[cc-by-nc-sa-image]: https://licensebuttons.net/l/by-nc-sa/4.0/88x31.png
+[cc-by-nc-sa-shield]: https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg
+
+
 ## Citation
 Please cite our [Computers in Industry 2021 paper](http://prints.vicos.si/publications/385) when using this code:
 
