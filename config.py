@@ -117,9 +117,9 @@ class Config:
         if args.VALIDATE_ON_TEST is not None: self.VALIDATE_ON_TEST = args.VALIDATE_ON_TEST
         if args.VALIDATION_N_EPOCHS is not None: self.VALIDATION_N_EPOCHS = args.VALIDATION_N_EPOCHS
         if args.USE_BEST_MODEL is not None: self.USE_BEST_MODEL = args.USE_BEST_MODEL
-        if args.ON_DEMAND_READ is not None: self.TRAIN_NUM = args.ON_DEMAND_READ
-        if args.REPRODUCIBLE_RUN is not None: self.TRAIN_NUM = args.REPRODUCIBLE_RUN
-        if args.MEMORY_FIT is not None: self.TRAIN_NUM = args.MEMORY_FIT
+        if args.ON_DEMAND_READ is not None: self.ON_DEMAND_READ = args.ON_DEMAND_READ
+        if args.REPRODUCIBLE_RUN is not None: self.REPRODUCIBLE_RUN = args.REPRODUCIBLE_RUN
+        if args.MEMORY_FIT is not None: self.MEMORY_FIT = args.MEMORY_FIT
         if args.SAVE_IMAGES is not None: self.SAVE_IMAGES = args.SAVE_IMAGES
         if args.DILATE is not None: self.DILATE = args.DILATE
 
