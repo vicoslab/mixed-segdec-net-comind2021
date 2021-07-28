@@ -147,9 +147,6 @@ class End2End:
 
             weight_loss_seg, weight_loss_dec = self.get_loss_weights(epoch)
             dec_gradient_multiplier = self.get_dec_gradient_multiplier()
-            if epoch < 10:
-                dec_gradient_multiplier = 0
-
             self.set_dec_gradient_multiplier(model, dec_gradient_multiplier)
 
             epoch_loss_seg, epoch_loss_dec, epoch_loss = 0, 0, 0
