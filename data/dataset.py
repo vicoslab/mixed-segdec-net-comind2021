@@ -120,13 +120,21 @@ class Dataset(torch.utils.data.Dataset):
         return x
 
     def distance_transform(self, mask: np.ndarray, max_val: float, p: float) -> np.ndarray:
-        dst_trf = distance_transform_edt(mask)
+        h, w = mask.shape[:2]
+        dst_trf = np.zeros((h, w))
 
-        if dst_trf.max() > 0:
-            dst_trf = (dst_trf / dst_trf.max())
-            dst_trf = (dst_trf ** p) * max_val
+        num_labels, labels = cv2.connectedComponents(mask, connectivity=8)
+        for idx in range(1, num_labels):
+            mask_roi= np.zeros((h, w))
+            k = labels == idx
+            mask_roi[k] = 255
+            dst_trf_roi = distance_transform_edt(mask_roi)
+            if dst_trf_roi.max() > 0:
+                dst_trf_roi = (dst_trf_roi / dst_trf_roi.max())
+                dst_trf_roi = (dst_trf_roi ** p) * max_val
+            dst_trf += dst_trf_roi
 
-        dst_trf[mask == 0] = 1.0
+        dst_trf[mask == 0] = 1
         return np.array(dst_trf, dtype=np.float32)
 
     def downsize(self, image: np.ndarray, downsize_factor: int = 8) -> np.ndarray:
