@@ -146,5 +146,5 @@ class Dataset(torch.utils.data.Dataset):
         length = rle[1::2]
         for pos, le in zip(positions, length):
             mask_label[pos - 1:pos + le - 1] = 1
-        mask = np.reshape(mask_label, (h, w), order='F')
+        mask = np.reshape(mask_label, (h, w), order='F').astype(np.uint8)
         return mask
