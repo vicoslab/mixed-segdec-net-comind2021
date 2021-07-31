@@ -122,8 +122,8 @@ class Dataset(torch.utils.data.Dataset):
     def distance_transform(self, mask: np.ndarray, max_val: float, p: float) -> np.ndarray:
         h, w = mask.shape[:2]
         dst_trf = np.zeros((h, w))
-
-        num_labels, labels = cv2.connectedComponents(mask, connectivity=8)
+        
+        num_labels, labels = cv2.connectedComponents((mask * 255.0).astype(np.uint8), connectivity=8)
         for idx in range(1, num_labels):
             mask_roi= np.zeros((h, w))
             k = labels == idx
