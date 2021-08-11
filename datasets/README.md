@@ -74,5 +74,8 @@ and after that you need to call `self.init_extra()`.
 For an example of eager loading you can check out `data.input_ksdd2.py`, and you can check out `data.input_steel.py` for an example of 
 on-demand-load.
 
+All of our implementations of datasets use `split_X_Y.pyb` files to get the images which are used for certain training scenarios, however if you wish to
+use the code on your own data, there is no need to generate or use split files, all that matters is that you load the contents of the dataset as described above.
+
 After you implemented data loading, you need to include the new dataset in `data.dataset_catalog.py` and
 in `config.py` you need to set input dimensions.
