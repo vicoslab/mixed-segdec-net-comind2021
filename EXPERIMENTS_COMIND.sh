@@ -16,7 +16,7 @@ run_COMIND_EXPERIMENTS()
     train_DAGM $SAVE_IMAGES N_ALL $RESULTS_PATH 7 1000 70 0.05 1 1 True  1 10 True  True  True  "${GPUS[@]}" # Table 3, Figure 5
 
 
-    train_KSDD $SAVE_IMAGES N_0    $RESULTS_PATH 7 33 0  50 1 1 0.01 True  2 1 False True  True  "${GPUS[@]}" # Figure 7, Table 4-Row 13
+    train_KSDD $SAVE_IMAGES N_0    $RESULTS_PATH 7 33 0  50 0.01 1 1 True  2 1 False True  True  "${GPUS[@]}" # Figure 7, Table 4-Row 13
     train_KSDD $SAVE_IMAGES N_5    $RESULTS_PATH 7 33 5  50 1 0.01 1 True  2 1 True  True  True  "${GPUS[@]}" # Figure 7, Table 4-Row 12
     train_KSDD $SAVE_IMAGES N_10   $RESULTS_PATH 7 33 10 50 1 0.01 1 True  2 1 True  True  True  "${GPUS[@]}" # Figure 7
     train_KSDD $SAVE_IMAGES N_15   $RESULTS_PATH 7 33 15 50 1 0.01 1 True  2 1 True  True  True  "${GPUS[@]}" # Figure 7
