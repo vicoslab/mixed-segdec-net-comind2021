@@ -85,11 +85,17 @@ class Config:
             if self.NUM_SEGMENTED is None:
                 raise Exception("Missing NUM_SEGMENTED for STEEL dataset!")
         elif self.DATASET == 'KSDD2':
+            self.INPUT_WIDTH = 448
+            self.INPUT_HEIGHT = 448
+            self.INPUT_CHANNELS = 3
+            if self.NUM_SEGMENTED is None:
+                raise Exception("Missing NUM_SEGMENTED for KSDD2 dataset!")
+        elif self.DATASET == 'crack_segmentation':
             self.INPUT_WIDTH = 232
             self.INPUT_HEIGHT = 640
             self.INPUT_CHANNELS = 3
             if self.NUM_SEGMENTED is None:
-                raise Exception("Missing NUM_SEGMENTED for KSDD2 dataset!")
+                raise Exception("Missing NUM_SEGMENTED for crack_segmentation dataset!")
         else:
             raise Exception('Unknown dataset {}'.format(self.DATASET))
 
