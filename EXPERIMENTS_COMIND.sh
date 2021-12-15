@@ -128,13 +128,6 @@ if [ "${#GPUS[@]}" -eq 0 ]; then
   #GPUS=(0 1 2) # if more GPUs available
 fi
 
-#run_COMIND_EXPERIMENTS ./results-comind True "${GPUS[@]}"
+run_COMIND_EXPERIMENTS ./results-comind True "${GPUS[@]}"
 
-RESULTS_PATH=./results
-SAVE_IMAGES=False
-
-train_DAGM $SAVE_IMAGES FS_ROW3   $RESULTS_PATH 7 1000  5 0.05 1 1 False 1 10 True  True  True  "${GPUS[@]}" # Table 4, Row 3
-train_single $SAVE_IMAGES STEEL $STEEL_PATH FS_ROW2  $RESULTS_PATH 1 1000 1000 5 0.1 0.1 10 False 2 1 True  False True  "${GPUS[@]}" # Table 4, Row 2
-train_KSDD $SAVE_IMAGES N_ALL  $RESULTS_PATH 7 33 33 50 1 0.01 1 True  2 1 True  True  True  "${GPUS[@]}" # Figure 7
-train_single $SAVE_IMAGES KSDD2 $KSDD2_PATH N_126 $RESULTS_PATH 15 -1 126 5 0.01 1 1 True  2 3 True  True  True  ${GPUS[0]} # Figure 9
 
