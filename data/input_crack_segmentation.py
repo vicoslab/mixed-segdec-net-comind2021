@@ -71,4 +71,6 @@ class CrackSegmentationDataset(Dataset):
         self.num_pos = len(pos_samples)
         self.num_neg = len(neg_samples)
 
+        self.len = 2 * len(pos_samples) if self.kind in ['TRAIN'] else len(pos_samples) + len(neg_samples)
+
         self.init_extra()
