@@ -35,10 +35,10 @@ class Dataset(torch.utils.data.Dataset):
                 sample_probability = sample_probability / np.sum(sample_probability)
 
                 # use replace=False for to get only unique values
-                self.neg_imgs_permutation = np.random.choice(range(self.num_neg),
-                                                             size=self.num_negatives_per_one_positive * self.num_pos,
-                                                             p=sample_probability,
-                                                             replace=False)
+                try:
+                    self.neg_imgs_permutation = np.random.choice(range(self.num_neg), size=self.num_negatives_per_one_positive * self.num_pos, p=sample_probability, replace=False)
+                except:
+                    self.neg_imgs_permutation = np.random.choice(range(self.num_neg), size=self.num_negatives_per_one_positive * self.num_pos, p=sample_probability, replace=True)
             else:
                 self.neg_imgs_permutation = np.random.permutation(self.num_neg)
 
