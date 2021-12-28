@@ -21,7 +21,7 @@ class CrackSegmentationDataset(Dataset):
 
         if self.kind == 'TEST':
             # Test Positive
-            positive_test_samples = os.listdir(path_to_positive_test_samples)
+            positive_test_samples = sorted(os.listdir(path_to_positive_test_samples))
             for i in range(0, len(positive_test_samples), 2):
                 image_path = path_to_positive_test_samples + "/" + positive_test_samples[i]
                 seg_mask_path = path_to_positive_test_samples + "/" + positive_test_samples[i + 1]
@@ -42,7 +42,7 @@ class CrackSegmentationDataset(Dataset):
                 pos_samples.append((image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, part))
             
             # Test Negative
-            negative_test_samples = os.listdir(path_to_negative_test_samples)
+            negative_test_samples = sorted(os.listdir(path_to_negative_test_samples))
             for i in range(0, len(negative_test_samples), 2):
                 image_path = path_to_negative_test_samples + "/" + negative_test_samples[i]
                 seg_mask_path = path_to_negative_test_samples + "/" + negative_test_samples[i + 1]
@@ -61,7 +61,7 @@ class CrackSegmentationDataset(Dataset):
         
         elif self.kind == 'TRAIN':
             # Train Positive
-            positive_train_samples = os.listdir(path_to_positive_train_samples)
+            positive_train_samples = sorted(os.listdir(path_to_positive_train_samples))
             for i in range(0, len(positive_train_samples), 2):
                 image_path = path_to_positive_train_samples + "/" + positive_train_samples[i]
                 seg_mask_path = path_to_positive_train_samples + "/" + positive_train_samples[i + 1]
@@ -82,7 +82,7 @@ class CrackSegmentationDataset(Dataset):
                 pos_samples.append((image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, part))
             
             # Train Negative
-            negative_train_samples = os.listdir(path_to_negative_train_samples)
+            negative_train_samples = sorted(os.listdir(path_to_negative_train_samples))
             for i in range(0, len(negative_train_samples), 2):
                 image_path = path_to_negative_train_samples + "/" + negative_train_samples[i]
                 seg_mask_path = path_to_negative_train_samples + "/" + negative_train_samples[i + 1]
@@ -109,4 +109,4 @@ class CrackSegmentationDataset(Dataset):
         
         print(f"{self.kind}: Number of positives: {self.num_pos}, Number of negatives: {self.num_neg}, Sum: {self.len}")
 
-        self.init_extra()        
+        self.init_extra()
