@@ -58,10 +58,10 @@ class CrackSegmentationDataset(Dataset):
             # Train Negative
             self.neg_samples = self.read_samples(path_to_negative_train_samples, 'neg')
 
-        self.num_pos = len(pos_samples)
-        self.num_neg = len(neg_samples)
+        self.num_pos = len(self.pos_samples)
+        self.num_neg = len(self.neg_samples)
 
-        self.len = len(pos_samples) + len(neg_samples)
+        self.len = self.num_pos + self.num_neg
         
         print(f"{self.kind}: Number of positives: {self.num_pos}, Number of negatives: {self.num_neg}, Sum: {self.len}")
 
