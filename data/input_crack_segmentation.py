@@ -10,7 +10,6 @@ class CrackSegmentationDataset(Dataset):
 
     def read_samples(self, path_to_samples, sample_kind):
         samples = [i for i in sorted(os.listdir(path_to_samples)) if 'GT' not in i]
-        samples_read = list()
 
         for sample in samples:
             part = sample.split(".")[0]
@@ -26,19 +25,18 @@ class CrackSegmentationDataset(Dataset):
             if sample_kind == 'pos':
                 seg_loss_mask = self.distance_transform(seg_mask, self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
                 seg_loss_mask = self.to_tensor(self.downsize(seg_loss_mask))
+                seg_mask = self.to_tensor(self.downsize(seg_mask))
+                self.pos_samples.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
             else:
                 seg_loss_mask = self.to_tensor(self.downsize(np.ones_like(seg_mask)))
-            
-            seg_mask = self.to_tensor(self.downsize(seg_mask))
-                
-            samples_read.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
-
-        return samples_read
+                seg_mask = self.to_tensor(self.downsize(seg_mask))
+                self.neg_samples.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
 
     def read_contents(self):
         #eager loading
 
-        pos_samples, neg_samples = [], []
+        self.pos_samples = list()
+        self.neg_samples = list()
 
         path_to_positive_test_samples = "./datasets/crack_segmentation/test_positive"
         path_to_negative_test_samples = "./datasets/crack_segmentation/test_negative"
@@ -48,15 +46,15 @@ class CrackSegmentationDataset(Dataset):
 
         if self.kind == 'TEST':
             # Test Positive
-            self.pos_samples = self.read_samples(path_to_positive_test_samples, 'pos')
+            self.read_samples(path_to_positive_test_samples, 'pos')
             # Test Negative
-            self.neg_samples = self.read_samples(path_to_negative_test_samples, 'neg')
+            self.read_samples(path_to_negative_test_samples, 'neg')
         
         elif self.kind == 'TRAIN':
             # Train Positive
-            self.pos_samples = self.read_samples(path_to_positive_train_samples, 'pos')
+            self.read_samples(path_to_positive_train_samples, 'pos')
             # Train Negative
-            self.neg_samples = self.read_samples(path_to_negative_train_samples, 'neg')
+            self.read_samples(path_to_negative_train_samples, 'neg')
 
         self.num_pos = len(self.pos_samples)
         self.num_neg = len(self.neg_samples)
