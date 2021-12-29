@@ -2,15 +2,8 @@ from end2end import End2End
 import argparse
 from config import Config
 
-# Example for KSDD train
-# CUDA_VISIBLE_DEVICES=0 python -u train_net.py --GPU=0 --DATASET=KSDD --RUN_NAME=RUN_NAME --DATASET_PATH=./datasets/KSDD --RESULTS_PATH=./RESULTS --SAVE_IMAGES=True --DILATE=7 --EPOCHS=50 --LEARNING_RATE=1.0 --DELTA_CLS_LOSS=0.01 --BATCH_SIZE=1 --WEIGHTED_SEG_LOSS=True --WEIGHTED_SEG_LOSS_P=2 --WEIGHTED_SEG_LOSS_MAX=1 --DYN_BALANCED_LOSS=True --GRADIENT_ADJUSTMENT=True --FREQUENCY_SAMPLING=True --TRAIN_NUM=33 --NUM_SEGMENTED=33 --FOLD=0
-
-# Example for crack_segmentation train
-# CUDA_VISIBLE_DEVICES=0 python -u train_net.py --GPU 0 --RUN_NAME run_all_data --DATASET crack_segmentation --DATASET_PATH ./datasets/crack_segmentation --EPOCHS 50 --LEARNING_RATE 1.0 --DELTA_CLS_LOSS 0.01 --BATCH_SIZE 1 --WEIGHTED_SEG_LOSS True --WEIGHTED_SEG_LOSS_P 2 --WEIGHTED_SEG_LOSS_MAX 1 --DYN_BALANCED_LOSS True --GRADIENT_ADJUSTMENT True --FREQUENCY_SAMPLING True --NUM_SEGMENTED 9887
-
 def str2bool(v):
     return v.lower() in ("yes", "true", "t", "1")
-
 
 def parse_args():
     parser = argparse.ArgumentParser()

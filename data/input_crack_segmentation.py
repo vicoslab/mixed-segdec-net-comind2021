@@ -8,99 +8,55 @@ class CrackSegmentationDataset(Dataset):
         super(CrackSegmentationDataset, self).__init__(cfg.DATASET_PATH, cfg, kind)
         self.read_contents()
 
+    def read_samples(self, path_to_samples, sample_kind):
+        samples = [i for i in sorted(os.listdir(path_to_samples)) if 'GT' not in i]
+        samples_read = list()
+
+        for sample in samples:
+            part = sample.split(".")[0]
+            
+            image_path = path_to_samples + "/" + sample
+            seg_mask_path = path_to_samples + "/" + part + "_GT.jpg"
+            
+            image = self.read_img_resize(image_path, self.grayscale, self.image_size)
+            image = self.to_tensor(image)
+
+            seg_mask, positive = self.read_label_resize(seg_mask_path, self.image_size, self.cfg.DILATE)
+
+            if sample_kind == 'pos':
+                seg_loss_mask = self.distance_transform(seg_mask, self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
+                seg_loss_mask = self.to_tensor(self.downsize(seg_loss_mask))
+            else:
+                seg_loss_mask = self.to_tensor(self.downsize(np.ones_like(seg_mask)))
+            
+            seg_mask = self.to_tensor(self.downsize(seg_mask))
+                
+            samples_read.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
+
+        return samples_read
+
     def read_contents(self):
         #eager loading
 
         pos_samples, neg_samples = [], []
 
         path_to_positive_test_samples = "./datasets/crack_segmentation/test_positive"
-        path_to_positive_train_samples = "./datasets/crack_segmentation/train_positive"
-
         path_to_negative_test_samples = "./datasets/crack_segmentation/test_negative"
+
+        path_to_positive_train_samples = "./datasets/crack_segmentation/train_positive"
         path_to_negative_train_samples = "./datasets/crack_segmentation/train_negative"
 
         if self.kind == 'TEST':
             # Test Positive
-            positive_test_samples = sorted(os.listdir(path_to_positive_test_samples))
-            for i in range(0, len(positive_test_samples), 2):
-                image_path = path_to_positive_test_samples + "/" + positive_test_samples[i]
-                seg_mask_path = path_to_positive_test_samples + "/" + positive_test_samples[i + 1]
-                
-                image = self.read_img_resize(image_path, self.grayscale, self.image_size)
-                image = self.to_tensor(image)
-
-                seg_mask, positive = self.read_label_resize(seg_mask_path, self.image_size, self.cfg.DILATE)
-
-                seg_loss_mask = self.distance_transform(seg_mask, self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
-                seg_loss_mask = self.to_tensor(self.downsize(seg_loss_mask))
-            
-                seg_mask = self.to_tensor(self.downsize(seg_mask))
-
-                is_segmented = True
-                part = positive_test_samples[i].split(".")[0]
-                
-                pos_samples.append((image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, part))
-            
+            self.pos_samples = self.read_samples(path_to_positive_test_samples, 'pos')
             # Test Negative
-            negative_test_samples = sorted(os.listdir(path_to_negative_test_samples))
-            for i in range(0, len(negative_test_samples), 2):
-                image_path = path_to_negative_test_samples + "/" + negative_test_samples[i]
-                seg_mask_path = path_to_negative_test_samples + "/" + negative_test_samples[i + 1]
-                
-                image = self.read_img_resize(image_path, self.grayscale, self.image_size)
-                image = self.to_tensor(image)
-
-                seg_mask, positive = self.read_label_resize(seg_mask_path, self.image_size, self.cfg.DILATE)
-
-                seg_loss_mask = self.to_tensor(self.downsize(np.ones_like(seg_mask)))
-                seg_mask = self.to_tensor(self.downsize(seg_mask))
-
-                part = negative_test_samples[i].split(".")[0]
-                
-                neg_samples.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
+            self.neg_samples = self.read_samples(path_to_negative_test_samples, 'neg')
         
         elif self.kind == 'TRAIN':
             # Train Positive
-            positive_train_samples = sorted(os.listdir(path_to_positive_train_samples))
-            for i in range(0, len(positive_train_samples), 2):
-                image_path = path_to_positive_train_samples + "/" + positive_train_samples[i]
-                seg_mask_path = path_to_positive_train_samples + "/" + positive_train_samples[i + 1]
-                
-                image = self.read_img_resize(image_path, self.grayscale, self.image_size)
-                image = self.to_tensor(image)
-
-                seg_mask, positive = self.read_label_resize(seg_mask_path, self.image_size, self.cfg.DILATE)
-
-                seg_loss_mask = self.distance_transform(seg_mask, self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
-                seg_loss_mask = self.to_tensor(self.downsize(seg_loss_mask))
-            
-                seg_mask = self.to_tensor(self.downsize(seg_mask))
-
-                is_segmented = True
-                part = positive_train_samples[i].split(".")[0]
-                
-                pos_samples.append((image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, part))
-            
+            self.pos_samples = self.read_samples(path_to_positive_train_samples, 'pos')
             # Train Negative
-            negative_train_samples = sorted(os.listdir(path_to_negative_train_samples))
-            for i in range(0, len(negative_train_samples), 2):
-                image_path = path_to_negative_train_samples + "/" + negative_train_samples[i]
-                seg_mask_path = path_to_negative_train_samples + "/" + negative_train_samples[i + 1]
-                
-                image = self.read_img_resize(image_path, self.grayscale, self.image_size)
-                image = self.to_tensor(image)
-
-                seg_mask, positive = self.read_label_resize(seg_mask_path, self.image_size, self.cfg.DILATE)
-
-                seg_loss_mask = self.to_tensor(self.downsize(np.ones_like(seg_mask)))
-                seg_mask = self.to_tensor(self.downsize(seg_mask))
-
-                part = negative_train_samples[i].split(".")[0]
-                
-                neg_samples.append((image, seg_mask, seg_loss_mask, True, image_path, seg_mask_path, part))
-
-        self.pos_samples = pos_samples
-        self.neg_samples = neg_samples
+            self.neg_samples = self.read_samples(path_to_negative_train_samples, 'neg')
 
         self.num_pos = len(pos_samples)
         self.num_neg = len(neg_samples)
