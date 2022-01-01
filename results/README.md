@@ -44,8 +44,8 @@
 | **False**   | 0           | 0           |
 
 
-![AUC](./crack_segmentation/run_50/auc.png)
-![Ap](./crack_segmentation/run_50/ap.png)
+![AUC](./crack_segmentation/run_50/auc.PNG)
+![Ap](./crack_segmentation/run_50/ap.PNG)
 ![Loss Val](./crack_segmentation/run_50/loss_val.png)
 ![Loss](./crack_segmentation/run_50/loss.png)
 ![Loss dec](./crack_segmentation/run_50/loss_dec.png)
