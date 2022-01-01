@@ -40,8 +40,8 @@
 
 |             | Positives   | Negatives   |
 | ----------- | ----------- | ----------- |
-| **True**    | 1483        | 212         |
-| **False**   | 0           | 0           |
+| **True**    | 1456        | 204         |
+| **False**   | 27          | 8           |
 
 
 ![AUC](./crack_segmentation/run_50/auc.PNG)
@@ -57,3 +57,5 @@
 ![test_output](./crack_segmentation/run_50/test_outputs/0.789_result_1503.jpg)
 ![test_output](./crack_segmentation/run_50/test_outputs/0.999_result_2490.jpg)
 ![test_output](./crack_segmentation/run_50/test_outputs/1.000_result_2889.jpg)
+
+Output of model learning is [here](./crack_segmentation/run_50/nohup.out).
