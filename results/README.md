@@ -38,10 +38,10 @@
 
 ## Results
 
-|             | Positives   | Negatives   |
-| ----------- | ----------- | ----------- |
-| **True**    | 1456        | 204         |
-| **False**   | 27          | 8           |
+|                  | True        | False       |
+| -----------      | ----------- | ----------- |
+| **Positives**    | 1475        | 8           |
+| **Negatives**    | 27          | 185         |
 
 
 ![AUC](./crack_segmentation/run_50/auc.PNG)
