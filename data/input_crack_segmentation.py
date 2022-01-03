@@ -44,6 +44,9 @@ class CrackSegmentationDataset(Dataset):
         path_to_positive_train_samples = "./datasets/crack_segmentation/train_positive"
         path_to_negative_train_samples = "./datasets/crack_segmentation/train_negative"
 
+        path_to_positive_val_samples = "./datasets/crack_segmentation/val_positive"
+        path_to_negative_val_samples = "./datasets/crack_segmentation/val_negative"
+
         if self.kind == 'TEST':
             # Test Positive
             self.read_samples(path_to_positive_test_samples, 'pos')
@@ -55,6 +58,12 @@ class CrackSegmentationDataset(Dataset):
             self.read_samples(path_to_positive_train_samples, 'pos')
             # Train Negative
             self.read_samples(path_to_negative_train_samples, 'neg')
+
+        elif self.kind == 'VAL':
+            # Val Positive
+            self.read_samples(path_to_positive_val_samples, 'pos')
+            # Val negative
+            self.read_samples(path_to_negative_val_samples, 'neg')
 
         self.num_pos = len(self.pos_samples)
         self.num_neg = len(self.neg_samples)
