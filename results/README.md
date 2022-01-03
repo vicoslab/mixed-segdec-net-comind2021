@@ -38,14 +38,14 @@
 
 ## Results
 
-|             | Positives   | Negatives   |
-| ----------- | ----------- | ----------- |
-| **True**    | 1483        | 212         |
-| **False**   | 0           | 0           |
+|                  | True        | False       |
+| -----------      | ----------- | ----------- |
+| **Positives**    | 1475        | 8           |
+| **Negatives**    | 27          | 185         |
 
 
-![AUC](./crack_segmentation/run_50/auc.png)
-![Ap](./crack_segmentation/run_50/ap.png)
+![AUC](./crack_segmentation/run_50/auc.PNG)
+![Ap](./crack_segmentation/run_50/ap.PNG)
 ![Loss Val](./crack_segmentation/run_50/loss_val.png)
 ![Loss](./crack_segmentation/run_50/loss.png)
 ![Loss dec](./crack_segmentation/run_50/loss_dec.png)
@@ -57,3 +57,5 @@
 ![test_output](./crack_segmentation/run_50/test_outputs/0.789_result_1503.jpg)
 ![test_output](./crack_segmentation/run_50/test_outputs/0.999_result_2490.jpg)
 ![test_output](./crack_segmentation/run_50/test_outputs/1.000_result_2889.jpg)
+
+Output of model learning is [here](./crack_segmentation/run_50/nohup.out).
