@@ -1,4 +1,5 @@
 import matplotlib
+from torch.utils import data
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -211,6 +212,8 @@ class End2End:
         res = []
         predictions, ground_truths = [], []
 
+        images, image_names, predicted_segs, true_segs = [], [], [], []
+
         for data_point in eval_loader:
             image, seg_mask, seg_loss_mask, _, sample_name = data_point
             image, seg_mask = image.to(device), seg_mask.to(device)
@@ -224,15 +227,22 @@ class End2End:
             pred_seg = pred_seg.detach().cpu().numpy()
             seg_mask = seg_mask.detach().cpu().numpy()
 
+            image = cv2.resize(np.transpose(image[0, :, :, :], (1, 2, 0)), dsize)
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            pred_seg = cv2.resize(pred_seg[0, 0, :, :], dsize) if len(pred_seg.shape) == 4 else cv2.resize(pred_seg[0, :, :], dsize)
+            seg_mask = cv2.resize(seg_mask[0, 0, :, :], dsize)
+
             predictions.append(prediction)
             ground_truths.append(is_pos)
             res.append((prediction, None, None, is_pos, sample_name[0]))
+
+            images.append(image)
+            image_names.append(sample_name[0])
+            predicted_segs.append(pred_seg)
+            true_segs.append(seg_mask)
+
             if not is_validation:
                 if save_images:
-                    image = cv2.resize(np.transpose(image[0, :, :, :], (1, 2, 0)), dsize)
-                    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-                    pred_seg = cv2.resize(pred_seg[0, 0, :, :], dsize) if len(pred_seg.shape) == 4 else cv2.resize(pred_seg[0, :, :], dsize)
-                    seg_mask = cv2.resize(seg_mask[0, 0, :, :], dsize)
                     if self.cfg.WEIGHTED_SEG_LOSS:
                         seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
                         utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask, save_folder, decision=prediction, plot_seg=plot_seg)
@@ -242,8 +252,9 @@ class End2End:
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
+            dice_mean, dice_std, jaccard_mean, jaccard_std = utils.dice_jaccard(predicted_segs, true_segs, metrics['best_thr'], images, image_names, self.run_path)
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
-                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}")
+                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}")
 
             return metrics["AP"], metrics["accuracy"]
         else:

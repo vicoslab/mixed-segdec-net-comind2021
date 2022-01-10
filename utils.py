@@ -152,3 +152,67 @@ def get_metrics(labels, predictions):
     metrics['TP'] = TP
     metrics['accuracy'] = (sum(TP) + sum(TN)) / (sum(TP) + sum(TN) + sum(FP) + sum(FN))
     return metrics
+
+def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=None, image_names=None, run_path=None):
+
+    results_dice = []
+    result_jaccard = []
+
+    # Preverimo ali so vsi listi enako dolgi
+    if not (len(segmentation_predicted) == len(segmentation_truth) == len(images) == len(image_names)):
+        raise ValueError('Not equal size of segmentation masks or images')
+    
+    # Naredimo binarne maske (predicted in true) s ustreznim thresholdom
+    for i in range(len(segmentation_predicted)):
+        segmentation_predicted[i] = (segmentation_predicted[i] > threshold).astype(np.uint8)
+        segmentation_truth[i] = (segmentation_truth[i] > threshold).astype(np.uint8)
+
+    # Save folder
+    if run_path is not None:
+        save_folder = f"{run_path}/dices"
+        create_folder(save_folder)
+
+    # Za vsak par izračunamo dice in jaccard
+    for i in range(len(segmentation_predicted)):
+        seg_pred = segmentation_predicted[i]
+        seg_true = segmentation_truth[i]
+        image = images[i]
+        image_name = image_names[i]
+
+        # Dice
+        dice = (2 * (seg_true * seg_pred).sum() + 1e-15) / (seg_true.sum() + seg_pred.sum() + 1e-15)
+        results_dice += [dice]
+
+        # Jaccard
+        intersection = (seg_pred * seg_true).sum()
+        union = seg_pred.sum() + seg_true.sum() - intersection
+        jaccard = (intersection + 1e-15) / (union + 1e-15)
+        result_jaccard += [jaccard]
+
+        # Vizualizacija
+        if run_path is not None:
+            plt.figure()
+            plt.clf()
+            plt.subplot(1, 3, 1)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('Image')
+            plt.imshow(image)
+            plt.xlabel(f"Threshold: {round(threshold, 5)}")
+            plt.subplot(1, 3, 2)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('Groundtruth')
+            plt.imshow(seg_true, cmap='gray')
+            plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
+            plt.subplot(1, 3, 3)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('Segmentation')
+            plt.imshow(seg_pred, cmap='gray')
+            plt.xlabel(f"Dice: {round(dice, 5)}")
+            plt.savefig(f"{save_folder}/{image_name}.png", bbox_inches='tight', dpi=300)
+            plt.close()
+
+    # Vrnemo povprečno vrednost ter standardno deviacijo za dice in jaccard
+    return np.mean(results_dice), np.std(results_dice), np.mean(result_jaccard), np.std(result_jaccard)
