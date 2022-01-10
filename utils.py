@@ -82,7 +82,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
         cv2.imwrite(f"{save_dir}/{out_prefix}_segmentation_{image_name}.png", jet_seg)
 
 
-def evaluate_metrics(samples, results_path, run_name):
+def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images, image_names):
     samples = np.array(samples)
 
     img_names = samples[:, 4]
@@ -90,6 +90,7 @@ def evaluate_metrics(samples, results_path, run_name):
     labels = samples[:, 3].astype(np.float32)
 
     metrics = get_metrics(labels, predictions)
+    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, metrics['best_thr'], images, image_names, results_path)
 
     df = pd.DataFrame(
         data={'prediction': predictions,
@@ -99,7 +100,7 @@ def evaluate_metrics(samples, results_path, run_name):
     df.to_csv(os.path.join(results_path, 'results.csv'), index=False)
 
     print(
-        f'{run_name} EVAL AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}')
+        f'{run_name} EVAL AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}')
 
     with open(os.path.join(results_path, 'metrics.pkl'), 'wb') as f:
         pickle.dump(metrics, f)
@@ -159,8 +160,12 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
     result_jaccard = []
 
     # Preverimo ali so vsi listi enako dolgi
-    if not (len(segmentation_predicted) == len(segmentation_truth) == len(images) == len(image_names)):
-        raise ValueError('Not equal size of segmentation masks or images')
+    if images is not None:
+        if not (len(segmentation_predicted) == len(segmentation_truth) == len(images) == len(image_names)):
+            raise ValueError('Not equal size of segmentation masks or images')
+    else:
+        if not (len(segmentation_predicted) == len(segmentation_truth)):
+            raise ValueError('Not equal size of segmentation masks')
     
     # Naredimo binarne maske (predicted in true) s ustreznim thresholdom
     for i in range(len(segmentation_predicted)):
@@ -176,8 +181,6 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
     for i in range(len(segmentation_predicted)):
         seg_pred = segmentation_predicted[i]
         seg_true = segmentation_truth[i]
-        image = images[i]
-        image_name = image_names[i]
 
         # Dice
         dice = (2 * (seg_true * seg_pred).sum() + 1e-15) / (seg_true.sum() + seg_pred.sum() + 1e-15)
@@ -190,7 +193,9 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
         result_jaccard += [jaccard]
 
         # Vizualizacija
-        if run_path is not None:
+        if images is not None:
+            image = images[i]
+            image_name = image_names[i]
             plt.figure()
             plt.clf()
             plt.subplot(1, 3, 1)

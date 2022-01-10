@@ -236,8 +236,9 @@ class End2End:
             ground_truths.append(is_pos)
             res.append((prediction, None, None, is_pos, sample_name[0]))
 
-            images.append(image)
-            image_names.append(sample_name[0])
+            if not is_validation:
+                images.append(image)
+                image_names.append(sample_name[0])
             predicted_segs.append(pred_seg)
             true_segs.append(seg_mask)
 
@@ -252,13 +253,13 @@ class End2End:
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
-            dice_mean, dice_std, jaccard_mean, jaccard_std = utils.dice_jaccard(predicted_segs, true_segs, metrics['best_thr'], images, image_names, self.run_path)
+            dice_mean, dice_std, jaccard_mean, jaccard_std = utils.dice_jaccard(predicted_segs, true_segs, metrics['best_thr'])
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}")
 
             return metrics["AP"], metrics["accuracy"]
         else:
-            utils.evaluate_metrics(res, self.run_path, self.run_name)
+            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, image_names)
 
     def get_dec_gradient_multiplier(self):
         if self.cfg.GRADIENT_ADJUSTMENT:
