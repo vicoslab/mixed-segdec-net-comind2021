@@ -259,7 +259,7 @@ class End2End:
 
             return metrics["AP"], metrics["accuracy"]
         else:
-            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, image_names)
+            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images)
 
     def get_dec_gradient_multiplier(self):
         if self.cfg.GRADIENT_ADJUSTMENT:

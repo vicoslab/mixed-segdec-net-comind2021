@@ -82,7 +82,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
         cv2.imwrite(f"{save_dir}/{out_prefix}_segmentation_{image_name}.png", jet_seg)
 
 
-def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images, image_names):
+def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images):
     samples = np.array(samples)
 
     img_names = samples[:, 4]
@@ -90,7 +90,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     labels = samples[:, 3].astype(np.float32)
 
     metrics = get_metrics(labels, predictions)
-    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, metrics['best_thr'], images, image_names, results_path)
+    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, metrics['best_thr'], images, img_names, results_path)
 
     df = pd.DataFrame(
         data={'prediction': predictions,
@@ -167,11 +167,6 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
         if not (len(segmentation_predicted) == len(segmentation_truth)):
             raise ValueError('Not equal size of segmentation masks')
     
-    # Naredimo binarne maske (predicted in true) s ustreznim thresholdom
-    for i in range(len(segmentation_predicted)):
-        segmentation_predicted[i] = (segmentation_predicted[i] > threshold).astype(np.uint8)
-        segmentation_truth[i] = (segmentation_truth[i] > threshold).astype(np.uint8)
-
     # Save folder
     if run_path is not None:
         save_folder = f"{run_path}/dices"
@@ -182,13 +177,17 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
         seg_pred = segmentation_predicted[i]
         seg_true = segmentation_truth[i]
 
+        # Naredimo binarne maske (predicted in true) s ustreznim thresholdom
+        seg_pred_bin = (seg_pred > threshold).astype(np.uint8)
+        seg_true_bin = (seg_true > threshold).astype(np.uint8)
+        
         # Dice
-        dice = (2 * (seg_true * seg_pred).sum() + 1e-15) / (seg_true.sum() + seg_pred.sum() + 1e-15)
+        dice = (2 * (seg_true_bin * seg_pred_bin).sum() + 1e-15) / (seg_true_bin.sum() + seg_pred_bin.sum() + 1e-15)
         results_dice += [dice]
 
         # Jaccard
-        intersection = (seg_pred * seg_true).sum()
-        union = seg_pred.sum() + seg_true.sum() - intersection
+        intersection = (seg_pred_bin * seg_true_bin).sum()
+        union = seg_pred_bin.sum() + seg_true_bin.sum() - intersection
         jaccard = (intersection + 1e-15) / (union + 1e-15)
         result_jaccard += [jaccard]
 
@@ -198,23 +197,38 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             image_name = image_names[i]
             plt.figure()
             plt.clf()
-            plt.subplot(1, 3, 1)
+
+            plt.subplot(1, 5, 1)
             plt.xticks([])
             plt.yticks([])
             plt.title('Image')
             plt.imshow(image)
             plt.xlabel(f"Threshold: {round(threshold, 5)}")
-            plt.subplot(1, 3, 2)
+            
+            plt.subplot(1, 5, 2)
             plt.xticks([])
             plt.yticks([])
             plt.title('Groundtruth')
             plt.imshow(seg_true, cmap='gray')
+            
+            plt.subplot(1, 5, 3)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('Groundtruth\nmask')
+            plt.imshow(seg_true_bin, cmap='gray')
             plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
-            plt.subplot(1, 3, 3)
+            
+            plt.subplot(1, 5, 4)
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation')
             plt.imshow(seg_pred, cmap='gray')
+            
+            plt.subplot(1, 5, 5)
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('Segmentation\nmask')
+            plt.imshow(seg_pred_bin, cmap='gray')
             plt.xlabel(f"Dice: {round(dice, 5)}")
             plt.savefig(f"{save_folder}/{round(dice, 3)}_dice_{image_name}.png", bbox_inches='tight', dpi=300)
             plt.close()
