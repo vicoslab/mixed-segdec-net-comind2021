@@ -212,12 +212,12 @@ class End2End:
         res = []
         predictions, ground_truths = [], []
 
-        images, image_names, predicted_segs, true_segs = [], [], [], []
+        images, predicted_segs, true_segs = [], [], []
 
         for data_point in eval_loader:
             image, seg_mask, seg_loss_mask, _, sample_name = data_point
             image, seg_mask = image.to(device), seg_mask.to(device)
-            is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item()
+            is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
             prediction, pred_seg = model(image)
             pred_seg = nn.Sigmoid()(pred_seg)
             prediction = nn.Sigmoid()(prediction)
@@ -236,11 +236,9 @@ class End2End:
             ground_truths.append(is_pos)
             res.append((prediction, None, None, is_pos, sample_name[0]))
 
-            if not is_validation:
-                images.append(image)
-                image_names.append(sample_name[0])
             predicted_segs.append(pred_seg)
             true_segs.append(seg_mask)
+            images.append(image)
 
             if not is_validation:
                 if save_images:
