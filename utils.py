@@ -223,7 +223,7 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.title('Segmentation\nmask')
             plt.imshow(seg_pred_bin, cmap='gray')
             plt.xlabel(f"Dice: {round(dice, 5)}")
-            plt.savefig(f"{save_folder}/{round(dice, 3)}_dice_{image_name}.png", bbox_inches='tight', dpi=300)
+            plt.savefig(f"{save_folder}/{round(dice, 3):.3f}_dice_{image_name}.png", bbox_inches='tight', dpi=300)
             plt.close()
 
     # Vrnemo povprečno vrednost ter standardno deviacijo za dice in jaccard
