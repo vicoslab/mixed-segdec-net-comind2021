@@ -73,7 +73,7 @@ class End2End:
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
-        images, seg_masks, seg_loss_masks, is_segmented, _ = data
+        images, seg_masks, seg_loss_masks, is_segmented, _, seg_mask_bin = data
 
         batch_size = self.cfg.BATCH_SIZE
         memory_fit = self.cfg.MEMORY_FIT  # Not supported yet for >1
@@ -99,7 +99,7 @@ class End2End:
                 tensorboard_writer.add_image(f"{iter_index}/seg_mask", seg_masks[0, :, :, :])
                 tensorboard_writer.add_image(f"{iter_index}/seg_loss_mask", seg_loss_masks_[0, :, :, :])
 
-            decision, output_seg_mask = model(images_)
+            decision, output_seg_mask, _ = model(images_)
 
             if is_segmented[sub_iter]:
                 if self.cfg.WEIGHTED_SEG_LOSS:
@@ -215,17 +215,19 @@ class End2End:
         images, predicted_segs, true_segs = [], [], []
 
         for data_point in eval_loader:
-            image, seg_mask, seg_loss_mask, _, sample_name = data_point
+            image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original = data_point
             image, seg_mask = image.to(device), seg_mask.to(device)
             is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
-            prediction, pred_seg = model(image)
+            prediction, pred_seg, pred_seg_upsampled = model(image)
             pred_seg = nn.Sigmoid()(pred_seg)
             prediction = nn.Sigmoid()(prediction)
+            pred_seg_upsampled = nn.Sigmoid()(pred_seg_upsampled)
 
             prediction = prediction.item()
             image = image.detach().cpu().numpy()
             pred_seg = pred_seg.detach().cpu().numpy()
             seg_mask = seg_mask.detach().cpu().numpy()
+            pred_seg_upsampled = pred_seg_upsampled.detach().cpu().numpy()
 
             image = cv2.resize(np.transpose(image[0, :, :, :], (1, 2, 0)), dsize)
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -236,8 +238,12 @@ class End2End:
             ground_truths.append(is_pos)
             res.append((prediction, None, None, is_pos, sample_name[0]))
 
-            predicted_segs.append(pred_seg)
-            true_segs.append(seg_mask)
+            pred_seg_upsampled = pred_seg_upsampled[0][0]
+            seg_mask_original = seg_mask_original.numpy()[0]
+            seg_mask_original = cv2.threshold(seg_mask_original, 128, 255, cv2.THRESH_BINARY)[1]
+            seg_mask_bin = (seg_mask_original / 255).astype(np.uint8)
+            predicted_segs.append(pred_seg_upsampled)
+            true_segs.append(seg_mask_bin)
             images.append(image)
 
             if not is_validation:

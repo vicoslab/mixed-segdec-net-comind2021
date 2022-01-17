@@ -85,7 +85,9 @@ class Dataset(torch.utils.data.Dataset):
 
         self.counter = self.counter + 1
 
-        return image, seg_mask, seg_loss_mask, is_segmented, sample_name
+        seg_mask_original = cv2.imread(seg_mask_path, cv2.IMREAD_GRAYSCALE) # Prebran ground truth - za potrebe evalvacije (Dice, Jaccard)
+
+        return image, seg_mask, seg_loss_mask, is_segmented, sample_name, seg_mask_original
 
     def __len__(self):
         return self.len

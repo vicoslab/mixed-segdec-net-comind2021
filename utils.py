@@ -175,12 +175,11 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
     # Za vsak par izračunamo dice in jaccard
     for i in range(len(segmentation_predicted)):
         seg_pred = segmentation_predicted[i]
-        seg_true = segmentation_truth[i]
+        seg_true_bin = segmentation_truth[i]
 
-        # Naredimo binarne maske (predicted in true) s ustreznim thresholdom
+        # Naredimo binarne maske s ustreznim thresholdom
         seg_pred_bin = (seg_pred > threshold).astype(np.uint8)
-        seg_true_bin = (seg_true > threshold).astype(np.uint8)
-        
+
         # Dice
         dice = (2 * (seg_true_bin * seg_pred_bin).sum() + 1e-15) / (seg_true_bin.sum() + seg_pred_bin.sum() + 1e-15)
         results_dice += [dice]
@@ -198,33 +197,27 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.figure()
             plt.clf()
 
-            plt.subplot(1, 5, 1)
+            plt.subplot(1, 4, 1)
             plt.xticks([])
             plt.yticks([])
             plt.title('Image')
             plt.imshow(image)
             plt.xlabel(f"Threshold: {round(threshold, 5)}")
             
-            plt.subplot(1, 5, 2)
+            plt.subplot(1, 4, 2)
             plt.xticks([])
             plt.yticks([])
             plt.title('Groundtruth')
-            plt.imshow(seg_true, cmap='gray')
-            
-            plt.subplot(1, 5, 3)
-            plt.xticks([])
-            plt.yticks([])
-            plt.title('Groundtruth\nmask')
             plt.imshow(seg_true_bin, cmap='gray')
-            plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
             
-            plt.subplot(1, 5, 4)
+            plt.subplot(1, 4, 3)
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation')
             plt.imshow(seg_pred, cmap='gray')
+            plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
             
-            plt.subplot(1, 5, 5)
+            plt.subplot(1, 4, 4)
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation\nmask')
