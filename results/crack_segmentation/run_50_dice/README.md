@@ -53,10 +53,10 @@
 
 ## Dice test outputs
 
-![test_output](dices\0.0_dice_113.png)
-![test_output](dices\0.12_dice_2523.png)
-![test_output](dices\0.217_dice_2267.png)
-![test_output](dices\0.665_dice_2484.png)
-![test_output](dices\0.737_dice_1962.png)
-![test_output](dices\0.897_dice_2368.png)
-![test_output](dices\1.0_dice_165.png)
+![test_output](dices/0.0_dice_113.png)
+![test_output](dices/0.12_dice_2523.png)
+![test_output](dices/0.217_dice_2267.png)
+![test_output](dices/0.665_dice_2484.png)
+![test_output](dices/0.737_dice_1962.png)
+![test_output](dices/0.897_dice_2368.png)
+![test_output](dices/1.0_dice_165.png)
