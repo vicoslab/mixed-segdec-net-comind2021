@@ -214,7 +214,11 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation')
+<<<<<<< HEAD
             plt.imshow(seg_pred, cmap='gray', vmin=0, vmax=1)
+=======
+            plt.imshow(seg_pred, cmap='gray')
+>>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
             plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
             
             plt.subplot(1, 4, 4)
