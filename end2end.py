@@ -76,11 +76,7 @@ class End2End:
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
-<<<<<<< HEAD
         images, seg_masks, seg_loss_masks, is_segmented, _, seg_mask_bins, seg_loss_mask_bins = data
-=======
-        images, seg_masks, seg_loss_masks, is_segmented, _, seg_mask_bin = data
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
 
         batch_size = self.cfg.BATCH_SIZE
         memory_fit = self.cfg.MEMORY_FIT  # Not supported yet for >1
@@ -108,11 +104,7 @@ class End2End:
                 tensorboard_writer.add_image(f"{iter_index}/seg_mask", seg_masks[0, :, :, :])
                 tensorboard_writer.add_image(f"{iter_index}/seg_loss_mask", seg_loss_masks_[0, :, :, :])
 
-<<<<<<< HEAD
             decision, output_seg_mask, seg_mask_upsampled = model(images_)
-=======
-            decision, output_seg_mask, _ = model(images_)
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
 
             if is_segmented[sub_iter]:
                 if self.cfg.WEIGHTED_SEG_LOSS:
@@ -232,11 +224,7 @@ class End2End:
         images, predicted_segs, true_segs = [], [], []
 
         for data_point in eval_loader:
-<<<<<<< HEAD
             image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original, _ = data_point
-=======
-            image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original = data_point
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
             image, seg_mask = image.to(device), seg_mask.to(device)
             is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
             prediction, pred_seg, pred_seg_upsampled = model(image)
@@ -260,11 +248,7 @@ class End2End:
             res.append((prediction, None, None, is_pos, sample_name[0]))
 
             pred_seg_upsampled = pred_seg_upsampled[0][0]
-<<<<<<< HEAD
             seg_mask_original = seg_mask_original.numpy()[0][0]
-=======
-            seg_mask_original = seg_mask_original.numpy()[0]
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
             seg_mask_original = cv2.threshold(seg_mask_original, 128, 255, cv2.THRESH_BINARY)[1]
             seg_mask_bin = (seg_mask_original / 255).astype(np.uint8)
             predicted_segs.append(pred_seg_upsampled)

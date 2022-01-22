@@ -33,7 +33,6 @@ def _conv_block(in_chanels, out_chanels, kernel_size, padding):
                          FeatureNorm(num_features=out_chanels, eps=0.001),
                          nn.ReLU())
 
-<<<<<<< HEAD
 # Blok dekonvolucije - poveča resolucija za 2x (stride=2), output_padding postavljen na 1 (Additional size added to one side of each dimension in the output shape)
 def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, output_padding=1):
     return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
@@ -43,12 +42,6 @@ def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, out
 
 """
 Custom module, 2 parametra (scale, bias)
-=======
-"""
-Custom module, 2 parametra (scale, bias)
-Kaj dela? Kaj je njegova funkcija?
-Normalizacija featurjev?
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
 Feature normalization normalizes each channel to a zero-mean distribution with a unit variance
 """
 class FeatureNorm(nn.Module):
@@ -86,13 +79,8 @@ class SegDecNet(nn.Module):
 
         self.volume = conv_block -> MaxPool -> 3x conv_block -> MaxPool -> 4x conv_block -> MaxPool -> conv_block
 
-<<<<<<< HEAD
         input: tensor, (torch.Size([1, 3, 448, 448]))
         output: tensor, (torch.Size([1, 1024, 56, 56]))
-=======
-        input: slika
-        output: tensor, Size([1, 1024, 56, 56])
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
         """
         self.volume = nn.Sequential(_conv_block(self.input_channels, 32, 5, 2),
                                     # _conv_block(32, 32, 5, 2), # Has been accidentally left out and remained the same since then
@@ -108,17 +96,10 @@ class SegDecNet(nn.Module):
                                     nn.MaxPool2d(2),
                                     _conv_block(64, 1024, 15, 7))
         """
-<<<<<<< HEAD
         2D konvolucija -> Normalizacija
         
         input: volume = tensor, (torch.Size([1, 1024, 56, 56]))
         output: tensor, (torch.Size([1, 1, 56, 56]))
-=======
-        seg_mask
-        2D konvolucija -> Normalizacija
-        input: volume = tensor, Size([1, 1024, 56, 56])
-        output: tensor, Size([1, 1, 56, 56])
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
         """
         self.seg_mask = nn.Sequential(
             Conv2d_init(in_channels=1024, out_channels=1, kernel_size=1, padding=0, bias=False),
@@ -145,15 +126,10 @@ class SegDecNet(nn.Module):
 
         self.device = device
 
-<<<<<<< HEAD
         # Upsampling
         self.seg_mask_upsample = nn.Sequential(_deconv_block(1, 1, 1, 0),
                                                _deconv_block(1, 1, 5, 2),
                                                _deconv_block(1, 1, 5, 2))
-=======
-        # 2D bilinear upsampling
-        self.seg_mask_upsample = nn.UpsamplingBilinear2d(size=(input_width, input_height))
->>>>>>> e07940d8ccae19981c9b972f8194294db2c8f452
 
     def set_gradient_multipliers(self, multiplier):
         self.volume_lr_multiplier_mask = (torch.ones((1,)) * multiplier).to(self.device)
