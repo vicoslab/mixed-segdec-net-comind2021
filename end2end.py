@@ -140,6 +140,7 @@ class End2End:
     def _train_model(self, device, model, train_loader, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, validation_set, tensorboard_writer):
         losses = []
         validation_data = []
+        threshold = 0
         max_validation = -1
         validation_step = self.cfg.VALIDATION_N_EPOCHS
 
@@ -200,7 +201,7 @@ class End2End:
                 tensorboard_writer.add_scalar("Accuracy/Train/", epoch_correct / samples_per_epoch, epoch)
 
             if self.cfg.VALIDATE and (epoch % validation_step == 0 or epoch == num_epochs - 1):
-                validation_ap, validation_accuracy, threshold = self.eval_model(device, model, validation_set, None, False, True, False)
+                validation_ap, validation_accuracy, threshold = self.eval_model(device, model, validation_set, None, False, True, False, None)
                 validation_data.append((validation_ap, epoch))
 
                 if validation_ap > max_validation:
