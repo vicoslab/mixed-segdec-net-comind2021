@@ -1,4 +1,6 @@
 import math
+from re import S
+from sklearn.inspection import partial_dependence
 import torch
 import torch.nn as nn
 from torch.nn import init
@@ -31,7 +33,17 @@ def _conv_block(in_chanels, out_chanels, kernel_size, padding):
                          FeatureNorm(num_features=out_chanels, eps=0.001),
                          nn.ReLU())
 
+# Blok dekonvolucije - poveča resolucija za 2x (stride=2), output_padding postavljen na 1 (Additional size added to one side of each dimension in the output shape)
+def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, output_padding=1):
+    return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
+                                     kernel_size=kernel_size, padding=padding, stride=stride, output_padding=output_padding, bias=False),
+                         FeatureNorm(num_features=out_channels, eps=0.001),
+                         nn.ReLU())
 
+"""
+Custom module, 2 parametra (scale, bias)
+Feature normalization normalizes each channel to a zero-mean distribution with a unit variance
+"""
 class FeatureNorm(nn.Module):
     def __init__(self, num_features, feature_index=1, rank=4, reduce_dims=(2, 3), eps=0.001, include_bias=True):
         super(FeatureNorm, self).__init__()
@@ -59,6 +71,17 @@ class SegDecNet(nn.Module):
         self.input_width = input_width
         self.input_height = input_height
         self.input_channels = input_channels
+        """
+        Sequential (container) = dodamo mu module, input gre v prvi modul, output prvega modula v naslednjega itd.
+        
+        _conv_block() = Sequential(Conv2d, FeatureNorm, ReLu) = sequential container, ki ima tri module: konvolucija, FeatureNorm, ReLu aktivacijska funkcija
+        MaxPool2d() = 2D max pooling
+
+        self.volume = conv_block -> MaxPool -> 3x conv_block -> MaxPool -> 4x conv_block -> MaxPool -> conv_block
+
+        input: tensor, (torch.Size([1, 3, 448, 448]))
+        output: tensor, (torch.Size([1, 1024, 56, 56]))
+        """
         self.volume = nn.Sequential(_conv_block(self.input_channels, 32, 5, 2),
                                     # _conv_block(32, 32, 5, 2), # Has been accidentally left out and remained the same since then
                                     nn.MaxPool2d(2),
@@ -72,7 +95,12 @@ class SegDecNet(nn.Module):
                                     _conv_block(64, 64, 5, 2),
                                     nn.MaxPool2d(2),
                                     _conv_block(64, 1024, 15, 7))
-
+        """
+        2D konvolucija -> Normalizacija
+        
+        input: volume = tensor, (torch.Size([1, 1024, 56, 56]))
+        output: tensor, (torch.Size([1, 1, 56, 56]))
+        """
         self.seg_mask = nn.Sequential(
             Conv2d_init(in_channels=1024, out_channels=1, kernel_size=1, padding=0, bias=False),
             FeatureNorm(num_features=1, eps=0.001, include_bias=False))
@@ -91,12 +119,17 @@ class SegDecNet(nn.Module):
 
         self.fc = nn.Linear(in_features=66, out_features=1)
 
+        # Custom autgrad funkcije - Gradient multiplyers
         self.volume_lr_multiplier_layer = GradientMultiplyLayer().apply
         self.glob_max_lr_multiplier_layer = GradientMultiplyLayer().apply
         self.glob_avg_lr_multiplier_layer = GradientMultiplyLayer().apply
 
         self.device = device
 
+        # Upsampling
+        self.seg_mask_upsample = nn.Sequential(_deconv_block(1, 1, 1, 0),
+                                               _deconv_block(1, 1, 5, 2),
+                                               _deconv_block(1, 1, 5, 2))
 
     def set_gradient_multipliers(self, multiplier):
         self.volume_lr_multiplier_mask = (torch.ones((1,)) * multiplier).to(self.device)
@@ -106,7 +139,9 @@ class SegDecNet(nn.Module):
     def forward(self, input):
         volume = self.volume(input)
         seg_mask = self.seg_mask(volume)
+        seg_mask_upsampled = self.seg_mask_upsample(seg_mask)
 
+        # Concatenation on dimension 1
         cat = torch.cat([volume, seg_mask], dim=1)
 
         cat = self.volume_lr_multiplier_layer(cat, self.volume_lr_multiplier_mask)
@@ -128,7 +163,7 @@ class SegDecNet(nn.Module):
         fc_in = torch.cat([global_max_feat, global_avg_feat, global_max_seg, global_avg_seg], dim=1)
         fc_in = fc_in.reshape(fc_in.size(0), -1)
         prediction = self.fc(fc_in)
-        return prediction, seg_mask
+        return prediction, seg_mask, seg_mask_upsampled
 
 
 class GradientMultiplyLayer(torch.autograd.Function):

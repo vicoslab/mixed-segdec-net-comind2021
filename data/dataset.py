@@ -85,7 +85,14 @@ class Dataset(torch.utils.data.Dataset):
 
         self.counter = self.counter + 1
 
-        return image, seg_mask, seg_loss_mask, is_segmented, sample_name
+        # Dodana originalna binarna maska - za potrebe evalvacije (Dice & Jaccard) in originalna segmentacijska loss maska - za potrebe upsamplane maske
+        seg_mask_original = cv2.imread(seg_mask_path, cv2.IMREAD_GRAYSCALE)
+        seg_loss_mask_original = self.distance_transform(np.array((seg_mask_original / 255.0), dtype=np.float32), self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
+
+        seg_mask_original = self.to_tensor(seg_mask_original)
+        seg_loss_mask_original = self.to_tensor(seg_loss_mask_original)
+
+        return image, seg_mask, seg_loss_mask, is_segmented, sample_name, seg_mask_original, seg_loss_mask_original
 
     def __len__(self):
         return self.len
