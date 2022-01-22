@@ -1,5 +1,4 @@
 import matplotlib
-from torch.utils import data
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
@@ -61,18 +60,19 @@ class End2End:
 
         tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_path) if WRITE_TENSORBOARD else None
 
-        train_results = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        losses, validation_data, threshold = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        train_results = (losses, validation_data)
         self._save_train_results(train_results)
         self._save_model(model)
 
-        self.eval(model, device, self.cfg.SAVE_IMAGES, False, False)
+        self.eval(model, device, self.cfg.SAVE_IMAGES, False, False, threshold)
 
         self._save_params()
 
-    def eval(self, model, device, save_images, plot_seg, reload_final):
+    def eval(self, model, device, save_images, plot_seg, reload_final, threshold):
         self.reload_model(model, reload_final)
         test_loader = get_dataset("TEST", self.cfg)
-        self.eval_model(device, model, test_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=False, plot_seg=plot_seg)
+        self.eval_model(device, model, test_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=False, plot_seg=plot_seg, threshold=threshold)
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
@@ -200,7 +200,7 @@ class End2End:
                 tensorboard_writer.add_scalar("Accuracy/Train/", epoch_correct / samples_per_epoch, epoch)
 
             if self.cfg.VALIDATE and (epoch % validation_step == 0 or epoch == num_epochs - 1):
-                validation_ap, validation_accuracy = self.eval_model(device, model, validation_set, None, False, True, False)
+                validation_ap, validation_accuracy, threshold = self.eval_model(device, model, validation_set, None, False, True, False)
                 validation_data.append((validation_ap, epoch))
 
                 if validation_ap > max_validation:
@@ -211,9 +211,9 @@ class End2End:
                 if tensorboard_writer is not None:
                     tensorboard_writer.add_scalar("Accuracy/Validation/", validation_accuracy, epoch)
 
-        return losses, validation_data
+        return losses, validation_data, threshold
 
-    def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg):
+    def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg, threshold):
         model.eval()
 
         dsize = self.cfg.INPUT_WIDTH, self.cfg.INPUT_HEIGHT
@@ -270,9 +270,9 @@ class End2End:
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}")
 
-            return metrics["AP"], metrics["accuracy"]
+            return metrics["AP"], metrics["accuracy"], metrics['best_thr']
         else:
-            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images)
+            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, threshold)
 
     def get_dec_gradient_multiplier(self):
         if self.cfg.GRADIENT_ADJUSTMENT:

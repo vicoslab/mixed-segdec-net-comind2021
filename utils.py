@@ -82,7 +82,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
         cv2.imwrite(f"{save_dir}/{out_prefix}_segmentation_{image_name}.png", jet_seg)
 
 
-def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images):
+def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images, threshold):
     samples = np.array(samples)
 
     img_names = samples[:, 4]
@@ -90,7 +90,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     labels = samples[:, 3].astype(np.float32)
 
     metrics = get_metrics(labels, predictions)
-    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, metrics['best_thr'], images, img_names, results_path)
+    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images, img_names, results_path)
 
     df = pd.DataFrame(
         data={'prediction': predictions,
@@ -214,7 +214,7 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation')
-            plt.imshow(seg_pred, cmap='gray', vmin=0, vmax=1)
+            plt.imshow(seg_pred, cmap='gray', vmin=0, vmax=1) # Popravljeno z vmin in vmax argumenti
             plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
             
             plt.subplot(1, 4, 4)
