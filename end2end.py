@@ -60,8 +60,8 @@ class End2End:
 
         tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_path) if WRITE_TENSORBOARD else None
 
-        losses, validation_data, threshold = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
-        train_results = (losses, validation_data)
+        losses, validation_data, threshold, dices_jaccards = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        train_results = (losses, validation_data, dices_jaccards)
         self._save_train_results(train_results)
         self._save_model(model)
 
@@ -140,6 +140,7 @@ class End2End:
     def _train_model(self, device, model, train_loader, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, validation_set, tensorboard_writer):
         losses = []
         validation_data = []
+        dices_jaccards = []
         threshold = 0
         max_validation = -1
         validation_step = self.cfg.VALIDATION_N_EPOCHS
@@ -201,8 +202,9 @@ class End2End:
                 tensorboard_writer.add_scalar("Accuracy/Train/", epoch_correct / samples_per_epoch, epoch)
 
             if self.cfg.VALIDATE and (epoch % validation_step == 0 or epoch == num_epochs - 1):
-                validation_ap, validation_accuracy, threshold = self.eval_model(device, model, validation_set, None, False, True, False, None)
+                validation_ap, validation_accuracy, threshold, dice, jaccard = self.eval_model(device, model, validation_set, None, False, True, False, None)
                 validation_data.append((validation_ap, epoch))
+                dices_jaccards.append((epoch, dice, jaccard))
 
                 if validation_ap > max_validation:
                     max_validation = validation_ap
@@ -212,7 +214,7 @@ class End2End:
                 if tensorboard_writer is not None:
                     tensorboard_writer.add_scalar("Accuracy/Validation/", validation_accuracy, epoch)
 
-        return losses, validation_data, threshold
+        return losses, validation_data, threshold, dices_jaccards
 
     def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg, threshold):
         model.eval()
@@ -271,7 +273,7 @@ class End2End:
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}")
 
-            return metrics["AP"], metrics["accuracy"], metrics['best_thr']
+            return metrics["AP"], metrics["accuracy"], metrics['best_thr'], dice_mean, jaccard_mean
         else:
             utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, threshold)
 
@@ -320,7 +322,7 @@ class End2End:
             f.writelines(params_lines)
 
     def _save_train_results(self, results):
-        losses, validation_data = results
+        losses, validation_data, dices_jaccards = results
         ls, ld, l, le = map(list, zip(*losses))
         plt.plot(le, l, label="Loss", color="red")
         plt.plot(le, ls, label="Loss seg")
@@ -342,6 +344,35 @@ class End2End:
         if self.cfg.VALIDATE:
             df_loss = pd.DataFrame(data={"validation_data": ls, "loss_dec": ld, "loss": l, "epoch": le})
             df_loss.to_csv(os.path.join(self.run_path, "losses.csv"), index=False)
+        
+        # Dice & Jaccard plot
+        epochs, dices, jaccards = map(list, zip(*dices_jaccards))
+
+        plt.plot(epochs, dices, label="Dice")
+        plt.plot(epochs, jaccards, label="Jaccard")
+        plt.xlabel("Epochs")
+        plt.ylabel("Dice")
+        plt.legend()
+        plt.savefig(os.path.join(self.run_path, "dice_jaccard"), dpi=200)
+
+        # Loss plot
+        # Loss
+        plt.plot(le, l)
+        plt.xlabel("Epochs")
+        plt.ylabel("Loss")
+        plt.savefig(os.path.join(self.run_path, "loss"), dpi=200)
+        
+        # Loss Segmentation
+        plt.plot(le, ls)
+        plt.xlabel("Epochs")
+        plt.ylabel("Loss Segmentation")
+        plt.savefig(os.path.join(self.run_path, "loss_seg"), dpi=200)
+
+        # Loss Dec
+        plt.plot(le, ld)
+        plt.xlabel("Epochs")
+        plt.ylabel("Loss Dec")
+        plt.savefig(os.path.join(self.run_path, "loss_dec"), dpi=200)
 
     def _save_model(self, model, name="final_state_dict.pth"):
         output_name = os.path.join(self.model_path, name)
