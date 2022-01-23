@@ -28,10 +28,10 @@ def calc_confusion_mat(D, Y):
     return FP, FN, TN, TP
 
 
-def plot_sample(image_name, image, segmentation, label, save_dir, decision=None, blur=True, plot_seg=False):
+def plot_sample(image_name, image, segmentation, label, save_dir, pred_seg_upsampled, decision=None, blur=True, plot_seg=False):
     plt.figure()
     plt.clf()
-    plt.subplot(1, 4, 1)
+    plt.subplot(1, 5, 1)
     plt.xticks([])
     plt.yticks([])
     plt.title('Input image')
@@ -44,13 +44,13 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
     else:
         plt.imshow(image)
 
-    plt.subplot(1, 4, 2)
+    plt.subplot(1, 5, 2)
     plt.xticks([])
     plt.yticks([])
     plt.title('Groundtruth')
     plt.imshow(label, cmap="gray")
 
-    plt.subplot(1, 4, 3)
+    plt.subplot(1, 5, 3)
     plt.xticks([])
     plt.yticks([])
     if decision is None:
@@ -61,7 +61,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
     vmax_value = max(1, np.max(segmentation))
     plt.imshow(segmentation, cmap="jet", vmax=vmax_value)
 
-    plt.subplot(1, 4, 4)
+    plt.subplot(1, 5, 4)
     plt.xticks([])
     plt.yticks([])
     plt.title('Output scaled')
@@ -72,8 +72,13 @@ def plot_sample(image_name, image, segmentation, label, save_dir, decision=None,
     else:
         plt.imshow((segmentation / segmentation.max() * 255).astype(np.uint8), cmap="jet")
 
-    out_prefix = '{:.3f}_'.format(decision) if decision is not None else ''
+    plt.subplot(1, 5, 5)
+    plt.xticks([])
+    plt.yticks([])
+    plt.title('Upsampled segmentation')
+    plt.imshow(pred_seg_upsampled, cmap='gray', vmin=0, vmax=1)
 
+    out_prefix = '{:.3f}_'.format(decision) if decision is not None else ''
     plt.savefig(f"{save_dir}/{out_prefix}result_{image_name}.jpg", bbox_inches='tight', dpi=300)
     plt.close()
 

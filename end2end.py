@@ -262,9 +262,9 @@ class End2End:
                 if save_images:
                     if self.cfg.WEIGHTED_SEG_LOSS:
                         seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask, save_folder, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
                     else:
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_mask, save_folder, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg, seg_mask, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
 
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
