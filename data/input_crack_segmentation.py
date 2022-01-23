@@ -2,6 +2,7 @@ import os
 import numpy as np
 from data.dataset import Dataset
 from config import Config
+from datetime import datetime
 
 class CrackSegmentationDataset(Dataset):
     def __init__(self, kind: str, cfg: Config):
@@ -76,6 +77,7 @@ class CrackSegmentationDataset(Dataset):
 
         self.len = self.num_pos + self.num_neg
         
-        print(f"{self.kind}: Number of positives: {self.num_pos}, Number of negatives: {self.num_neg}, Sum: {self.len}")
+        time = datetime.now().strftime("%d-%m-%y %H:%M")
+        print(f"{time} {self.kind}: Number of positives: {self.num_pos}, Number of negatives: {self.num_neg}, Sum: {self.len}")
 
         self.init_extra()

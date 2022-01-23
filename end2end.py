@@ -32,7 +32,7 @@ class End2End:
         self.storage_path: str = os.path.join(self.cfg.RESULTS_PATH, self.cfg.DATASET)
 
     def _log(self, message, lvl=LVL_INFO):
-        time = datetime.now().strftime("%d-%m-%y %H:%M:%S")
+        time = datetime.now().strftime("%d-%m-%y %H:%M")
         n_msg = f"{time} {self.run_name} {message}"
         if lvl >= LOG:
             print(n_msg)
@@ -254,10 +254,8 @@ class End2End:
 
             pred_seg_upsampled = pred_seg_upsampled[0][0]
             seg_mask_original = seg_mask_original.numpy()[0][0]
-            seg_mask_original = cv2.threshold(seg_mask_original, 128, 255, cv2.THRESH_BINARY)[1]
-            seg_mask_bin = (seg_mask_original / 255).astype(np.uint8)
             predicted_segs.append(pred_seg_upsampled)
-            true_segs.append(seg_mask_bin)
+            true_segs.append(seg_mask_original)
             images.append(image)
 
             if not is_validation:
