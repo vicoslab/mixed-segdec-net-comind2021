@@ -61,7 +61,7 @@ class Dataset(torch.utils.data.Dataset):
                 ix = index - self.num_neg
                 item = self.pos_samples[ix]
 
-        image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, sample_name = item
+        image, seg_mask, seg_loss_mask, is_segmented, image_path, seg_mask_path, sample_name, seg_mask_original, seg_loss_mask_original = item
 
         if self.cfg.ON_DEMAND_READ:  # STEEL only so far
             if image_path == -1 or seg_mask_path == -1:
@@ -84,13 +84,6 @@ class Dataset(torch.utils.data.Dataset):
             seg_loss_mask = self.to_tensor(self.downsize(seg_loss_mask))
 
         self.counter = self.counter + 1
-
-        # Dodana originalna binarna maska - za potrebe evalvacije (Dice & Jaccard) in originalna segmentacijska loss maska - za potrebe upsamplane maske
-        seg_mask_original = cv2.imread(seg_mask_path, cv2.IMREAD_GRAYSCALE)
-        seg_loss_mask_original = self.distance_transform(np.array((seg_mask_original / 255.0), dtype=np.float32), self.cfg.WEIGHTED_SEG_LOSS_MAX, self.cfg.WEIGHTED_SEG_LOSS_P)
-
-        seg_mask_original = self.to_tensor(seg_mask_original)
-        seg_loss_mask_original = self.to_tensor(seg_loss_mask_original)
 
         return image, seg_mask, seg_loss_mask, is_segmented, sample_name, seg_mask_original, seg_loss_mask_original
 
