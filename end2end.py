@@ -14,6 +14,7 @@ import random
 import cv2
 from config import Config
 from torch.utils.tensorboard import SummaryWriter
+from datetime import datetime
 
 LVL_ERROR = 10
 LVL_INFO = 5
@@ -31,7 +32,8 @@ class End2End:
         self.storage_path: str = os.path.join(self.cfg.RESULTS_PATH, self.cfg.DATASET)
 
     def _log(self, message, lvl=LVL_INFO):
-        n_msg = f"{self.run_name} {message}"
+        time = datetime.now().strftime("%d-%m-%y %H:%M:%S")
+        n_msg = f"{time} {self.run_name} {message}"
         if lvl >= LOG:
             print(n_msg)
 
