@@ -75,7 +75,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, pred_seg_upsam
     plt.subplot(1, 5, 5)
     plt.xticks([])
     plt.yticks([])
-    plt.title('Upsampled segmentation')
+    plt.title('Upsampled\nsegmentation')
     plt.imshow(pred_seg_upsampled, cmap='gray', vmin=0, vmax=1)
 
     out_prefix = '{:.3f}_'.format(decision) if decision is not None else ''
@@ -226,7 +226,7 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.xticks([])
             plt.yticks([])
             plt.title('Segmentation\nmask')
-            plt.imshow(seg_pred_bin, cmap='gray')
+            plt.imshow(seg_pred_bin, cmap='gray', vmin=0, vmax=1)
             plt.xlabel(f"Dice: {round(dice, 5)}")
             plt.savefig(f"{save_folder}/{round(dice, 3):.3f}_dice_{image_name}.png", bbox_inches='tight', dpi=300)
             plt.close()

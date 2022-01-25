@@ -271,7 +271,7 @@ class End2End:
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
             dice_mean, dice_std, jaccard_mean, jaccard_std = utils.dice_jaccard(predicted_segs, true_segs, metrics['best_thr'])
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
-                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}")
+                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std:f}")
 
             return metrics["AP"], metrics["accuracy"], metrics['best_thr'], dice_mean, jaccard_mean
         else:
@@ -347,7 +347,7 @@ class End2End:
         
         # Dice & Jaccard plot
         epochs, dices, jaccards = map(list, zip(*dices_jaccards))
-
+        plt.clf()
         plt.plot(epochs, dices, label="Dice")
         plt.plot(epochs, jaccards, label="Jaccard")
         plt.xlabel("Epochs")
@@ -357,18 +357,21 @@ class End2End:
 
         # Loss plot
         # Loss
+        plt.clf()
         plt.plot(le, l)
         plt.xlabel("Epochs")
         plt.ylabel("Loss")
         plt.savefig(os.path.join(self.run_path, "loss"), dpi=200)
         
         # Loss Segmentation
+        plt.clf()
         plt.plot(le, ls)
         plt.xlabel("Epochs")
         plt.ylabel("Loss Segmentation")
         plt.savefig(os.path.join(self.run_path, "loss_seg"), dpi=200)
 
         # Loss Dec
+        plt.clf()
         plt.plot(le, ld)
         plt.xlabel("Epochs")
         plt.ylabel("Loss Dec")
