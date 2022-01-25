@@ -34,11 +34,17 @@ def _conv_block(in_chanels, out_chanels, kernel_size, padding):
                          nn.ReLU())
 
 # Blok dekonvolucije - poveča resolucija za 2x (stride=2), output_padding postavljen na 1 (Additional size added to one side of each dimension in the output shape)
-def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, output_padding=1):
-    return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
+# Popravljeno
+def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, output_padding=1, is_last_block=False):
+    if is_last_block:
+        return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
                                      kernel_size=kernel_size, padding=padding, stride=stride, output_padding=output_padding, bias=False),
-                         FeatureNorm(num_features=out_channels, eps=0.001),
-                         nn.ReLU())
+                             FeatureNorm(num_features=out_channels, eps=0.001))
+    else:
+        return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
+                                     kernel_size=kernel_size, padding=padding, stride=stride, output_padding=output_padding, bias=False),
+                             FeatureNorm(num_features=out_channels, eps=0.001),
+                             nn.ReLU())
 
 """
 Custom module, 2 parametra (scale, bias)
@@ -127,9 +133,15 @@ class SegDecNet(nn.Module):
         self.device = device
 
         # Upsampling
+        """ 
         self.seg_mask_upsample = nn.Sequential(_deconv_block(1, 1, 1, 0),
                                                _deconv_block(1, 1, 5, 2),
                                                _deconv_block(1, 1, 5, 2))
+        """
+        # Popravljeno
+        self.seg_mask_upsample = nn.Sequential(_deconv_block(1024, 64, 15, 7),
+                                               _deconv_block(64, 32, 5, 2),
+                                               _deconv_block(32, 1, 5, 2, is_last_block=True))
 
     def set_gradient_multipliers(self, multiplier):
         self.volume_lr_multiplier_mask = (torch.ones((1,)) * multiplier).to(self.device)
@@ -139,7 +151,9 @@ class SegDecNet(nn.Module):
     def forward(self, input):
         volume = self.volume(input)
         seg_mask = self.seg_mask(volume)
-        seg_mask_upsampled = self.seg_mask_upsample(seg_mask)
+        #seg_mask_upsampled = self.seg_mask_upsample(seg_mask)
+        # Popravljeno
+        seg_mask_upsampled = self.seg_mask_upsample(volume)
 
         # Concatenation on dimension 1
         cat = torch.cat([volume, seg_mask], dim=1)
