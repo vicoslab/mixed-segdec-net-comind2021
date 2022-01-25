@@ -56,7 +56,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, pred_seg_upsam
     if decision is None:
         plt.title('Output')
     else:
-        plt.title(f"Output: {decision:.5f}")
+        plt.title(f"Output:\n{decision:.5f}")
     # display max
     vmax_value = max(1, np.max(segmentation))
     plt.imshow(segmentation, cmap="jet", vmax=vmax_value)
@@ -64,7 +64,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, pred_seg_upsam
     plt.subplot(1, 5, 4)
     plt.xticks([])
     plt.yticks([])
-    plt.title('Output scaled')
+    plt.title('Output\nscaled')
     if blur:
         normed = segmentation / segmentation.max()
         blured = cv2.blur(normed, (32, 32))

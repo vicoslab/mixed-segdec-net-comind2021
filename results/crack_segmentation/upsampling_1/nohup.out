@@ -1,0 +1,210 @@
+upsampling_1 Executing run with path ./RESULTS/crack_segmentation/upsampling_1
+upsampling_1 BATCH_SIZE                : 1
+upsampling_1 DATASET                   : crack_segmentation
+upsampling_1 DATASET_PATH              : ./datasets/crack_segmentation
+upsampling_1 DELTA_CLS_LOSS            : 0.01
+upsampling_1 DILATE                    : 1
+upsampling_1 DYN_BALANCED_LOSS         : True
+upsampling_1 EPOCHS                    : 50
+upsampling_1 FOLD                      : None
+upsampling_1 FREQUENCY_SAMPLING        : True
+upsampling_1 GPU                       : 3
+upsampling_1 GRADIENT_ADJUSTMENT       : True
+upsampling_1 INPUT_CHANNELS            : 3
+upsampling_1 INPUT_HEIGHT              : 448
+upsampling_1 INPUT_WIDTH               : 448
+upsampling_1 LEARNING_RATE             : 1.0
+upsampling_1 MEMORY_FIT                : 1
+upsampling_1 NUM_SEGMENTED             : 6921
+upsampling_1 ON_DEMAND_READ            : False
+upsampling_1 REPRODUCIBLE_RUN          : False
+upsampling_1 RESULTS_PATH              : ./RESULTS
+upsampling_1 SAVE_IMAGES               : True
+upsampling_1 TRAIN_NUM                 : None
+upsampling_1 USE_BEST_MODEL            : True
+upsampling_1 VALIDATE                  : True
+upsampling_1 VALIDATE_ON_TEST          : False
+upsampling_1 VALIDATION_N_EPOCHS       : 5
+upsampling_1 WEIGHTED_SEG_LOSS         : True
+upsampling_1 WEIGHTED_SEG_LOSS_MAX     : 1.0
+upsampling_1 WEIGHTED_SEG_LOSS_P       : 2.0
+TRAIN: Number of positives: 6921, Number of negatives: 987, Sum: 7908
+VAL: Number of positives: 1483, Number of negatives: 212, Sum: 1695
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_00.pth
+upsampling_1 Returning seg_loss_weight 1.0 and dec_loss_weight 0.0
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 1/50 ==> avg_loss_seg=0.77607, avg_loss_dec=0.67021, avg_loss=0.05212, correct=833/7908, in 1078.17s/epoch (fwd/bck in 1072.90s/epoch)
+upsampling_1 VALIDATION || AUC=0.280894, and AP=0.790086, with best thr=0.555733 at f-measure=0.933 and FP=212, FN=0, TOTAL SAMPLES=1695, Dice: mean: 0.071773, std: 0.049464158989976297, Jaccard: mean: 0.037910, std: 0.02681362426441083
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/best_state_dict.pth
+upsampling_1 Returning seg_loss_weight 0.98 and dec_loss_weight 0.0002
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 2/50 ==> avg_loss_seg=0.76848, avg_loss_dec=0.63724, avg_loss=0.04274, correct=937/7908, in 1081.12s/epoch (fwd/bck in 1075.64s/epoch)
+upsampling_1 Returning seg_loss_weight 0.96 and dec_loss_weight 0.0004
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 3/50 ==> avg_loss_seg=0.76605, avg_loss_dec=0.58105, avg_loss=0.03912, correct=1652/7908, in 1081.94s/epoch (fwd/bck in 1076.43s/epoch)
+upsampling_1 Returning seg_loss_weight 0.94 and dec_loss_weight 0.0006
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 4/50 ==> avg_loss_seg=0.76465, avg_loss_dec=0.54705, avg_loss=0.03669, correct=1772/7908, in 1081.35s/epoch (fwd/bck in 1075.80s/epoch)
+upsampling_1 Returning seg_loss_weight 0.92 and dec_loss_weight 0.0008
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 5/50 ==> avg_loss_seg=0.76383, avg_loss_dec=0.53315, avg_loss=0.03491, correct=1794/7908, in 1081.38s/epoch (fwd/bck in 1075.85s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_05.pth
+upsampling_1 Returning seg_loss_weight 0.9 and dec_loss_weight 0.001
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 6/50 ==> avg_loss_seg=0.76314, avg_loss_dec=0.52206, avg_loss=0.03335, correct=1798/7908, in 1082.28s/epoch (fwd/bck in 1076.72s/epoch)
+upsampling_1 VALIDATION || AUC=0.989392, and AP=0.998495, with best thr=0.485727 at f-measure=0.981 and FP=23, FN=32, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/best_state_dict.pth
+upsampling_1 Returning seg_loss_weight 0.88 and dec_loss_weight 0.0012
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 7/50 ==> avg_loss_seg=0.76240, avg_loss_dec=0.51365, avg_loss=0.03188, correct=1817/7908, in 1081.46s/epoch (fwd/bck in 1075.89s/epoch)
+upsampling_1 Returning seg_loss_weight 0.86 and dec_loss_weight 0.0014000000000000002
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 8/50 ==> avg_loss_seg=0.76205, avg_loss_dec=0.50464, avg_loss=0.03071, correct=1825/7908, in 1080.87s/epoch (fwd/bck in 1075.32s/epoch)
+upsampling_1 Returning seg_loss_weight 0.84 and dec_loss_weight 0.0016
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 9/50 ==> avg_loss_seg=0.76130, avg_loss_dec=0.49882, avg_loss=0.02934, correct=1837/7908, in 1080.89s/epoch (fwd/bck in 1075.31s/epoch)
+upsampling_1 Returning seg_loss_weight 0.8200000000000001 and dec_loss_weight 0.0018
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 10/50 ==> avg_loss_seg=0.76072, avg_loss_dec=0.49349, avg_loss=0.02811, correct=1841/7908, in 1080.88s/epoch (fwd/bck in 1075.38s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_10.pth
+upsampling_1 Returning seg_loss_weight 0.8 and dec_loss_weight 0.002
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 11/50 ==> avg_loss_seg=0.76040, avg_loss_dec=0.48840, avg_loss=0.02714, correct=1836/7908, in 1080.66s/epoch (fwd/bck in 1075.19s/epoch)
+upsampling_1 VALIDATION || AUC=0.996040, and AP=0.999449, with best thr=0.596095 at f-measure=0.989 and FP=8, FN=24, TOTAL SAMPLES=1695, Dice: mean: 0.071382, std: 0.04486870401116648, Jaccard: mean: 0.037573, std: 0.02410741340058762
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/best_state_dict.pth
+upsampling_1 Returning seg_loss_weight 0.78 and dec_loss_weight 0.0022
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 12/50 ==> avg_loss_seg=0.75984, avg_loss_dec=0.48169, avg_loss=0.02602, correct=1852/7908, in 1080.71s/epoch (fwd/bck in 1075.21s/epoch)
+upsampling_1 Returning seg_loss_weight 0.76 and dec_loss_weight 0.0024
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 13/50 ==> avg_loss_seg=0.75959, avg_loss_dec=0.47892, avg_loss=0.02516, correct=1855/7908, in 1081.26s/epoch (fwd/bck in 1075.76s/epoch)
+upsampling_1 Returning seg_loss_weight 0.74 and dec_loss_weight 0.0026000000000000003
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 14/50 ==> avg_loss_seg=0.75936, avg_loss_dec=0.47608, avg_loss=0.02436, correct=1853/7908, in 1080.93s/epoch (fwd/bck in 1075.45s/epoch)
+upsampling_1 Returning seg_loss_weight 0.72 and dec_loss_weight 0.0028000000000000004
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 15/50 ==> avg_loss_seg=0.75897, avg_loss_dec=0.47297, avg_loss=0.02344, correct=1853/7908, in 1081.45s/epoch (fwd/bck in 1075.96s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_15.pth
+upsampling_1 Returning seg_loss_weight 0.7 and dec_loss_weight 0.003
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 16/50 ==> avg_loss_seg=0.75874, avg_loss_dec=0.47000, avg_loss=0.02268, correct=1858/7908, in 1081.39s/epoch (fwd/bck in 1075.91s/epoch)
+upsampling_1 VALIDATION || AUC=0.995041, and AP=0.999286, with best thr=0.292482 at f-measure=0.989 and FP=23, FN=11, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.6799999999999999 and dec_loss_weight 0.0032
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 17/50 ==> avg_loss_seg=0.75836, avg_loss_dec=0.46584, avg_loss=0.02182, correct=1854/7908, in 1080.65s/epoch (fwd/bck in 1075.12s/epoch)
+upsampling_1 Returning seg_loss_weight 0.6599999999999999 and dec_loss_weight 0.0034000000000000002
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 18/50 ==> avg_loss_seg=0.75812, avg_loss_dec=0.46349, avg_loss=0.02108, correct=1859/7908, in 1081.25s/epoch (fwd/bck in 1075.34s/epoch)
+upsampling_1 Returning seg_loss_weight 0.64 and dec_loss_weight 0.0036
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 19/50 ==> avg_loss_seg=0.75796, avg_loss_dec=0.46347, avg_loss=0.02042, correct=1856/7908, in 1081.23s/epoch (fwd/bck in 1075.75s/epoch)
+upsampling_1 Returning seg_loss_weight 0.62 and dec_loss_weight 0.0038
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 20/50 ==> avg_loss_seg=0.75778, avg_loss_dec=0.46114, avg_loss=0.01976, correct=1852/7908, in 1081.05s/epoch (fwd/bck in 1075.56s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_20.pth
+upsampling_1 Returning seg_loss_weight 0.6 and dec_loss_weight 0.004
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 21/50 ==> avg_loss_seg=0.75758, avg_loss_dec=0.46035, avg_loss=0.01909, correct=1853/7908, in 1080.66s/epoch (fwd/bck in 1075.13s/epoch)
+upsampling_1 VALIDATION || AUC=0.994402, and AP=0.999221, with best thr=0.563876 at f-measure=0.987 and FP=14, FN=25, TOTAL SAMPLES=1695, Dice: mean: 0.067678, std: 0.04552807276516845, Jaccard: mean: 0.035602, std: 0.024510977400160488
+upsampling_1 Returning seg_loss_weight 0.5800000000000001 and dec_loss_weight 0.0042
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 22/50 ==> avg_loss_seg=0.75744, avg_loss_dec=0.45817, avg_loss=0.01847, correct=1853/7908, in 1081.15s/epoch (fwd/bck in 1075.66s/epoch)
+upsampling_1 Returning seg_loss_weight 0.56 and dec_loss_weight 0.0044
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 23/50 ==> avg_loss_seg=0.75728, avg_loss_dec=0.45715, avg_loss=0.01786, correct=1850/7908, in 1080.66s/epoch (fwd/bck in 1075.16s/epoch)
+upsampling_1 Returning seg_loss_weight 0.54 and dec_loss_weight 0.0046
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 24/50 ==> avg_loss_seg=0.75717, avg_loss_dec=0.45523, avg_loss=0.01729, correct=1856/7908, in 1080.70s/epoch (fwd/bck in 1075.18s/epoch)
+upsampling_1 Returning seg_loss_weight 0.52 and dec_loss_weight 0.0048
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 25/50 ==> avg_loss_seg=0.75704, avg_loss_dec=0.45451, avg_loss=0.01671, correct=1852/7908, in 1081.74s/epoch (fwd/bck in 1076.23s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_25.pth
+upsampling_1 Returning seg_loss_weight 0.5 and dec_loss_weight 0.005
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 26/50 ==> avg_loss_seg=0.75698, avg_loss_dec=0.45327, avg_loss=0.01617, correct=1858/7908, in 1080.93s/epoch (fwd/bck in 1075.50s/epoch)
+upsampling_1 VALIDATION || AUC=0.995293, and AP=0.999315, with best thr=0.347394 at f-measure=0.989 and FP=19, FN=15, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.48 and dec_loss_weight 0.005200000000000001
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 27/50 ==> avg_loss_seg=0.75687, avg_loss_dec=0.45234, avg_loss=0.01563, correct=1857/7908, in 1081.29s/epoch (fwd/bck in 1075.79s/epoch)
+upsampling_1 Returning seg_loss_weight 0.45999999999999996 and dec_loss_weight 0.0054
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 28/50 ==> avg_loss_seg=0.75682, avg_loss_dec=0.45236, avg_loss=0.01512, correct=1855/7908, in 1081.61s/epoch (fwd/bck in 1076.12s/epoch)
+upsampling_1 Returning seg_loss_weight 0.43999999999999995 and dec_loss_weight 0.005600000000000001
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 29/50 ==> avg_loss_seg=0.75672, avg_loss_dec=0.45079, avg_loss=0.01459, correct=1858/7908, in 1080.54s/epoch (fwd/bck in 1075.04s/epoch)
+upsampling_1 Returning seg_loss_weight 0.42000000000000004 and dec_loss_weight 0.0058
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 30/50 ==> avg_loss_seg=0.75664, avg_loss_dec=0.45014, avg_loss=0.01408, correct=1855/7908, in 1080.41s/epoch (fwd/bck in 1074.87s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_30.pth
+upsampling_1 Returning seg_loss_weight 0.4 and dec_loss_weight 0.006
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 31/50 ==> avg_loss_seg=0.75660, avg_loss_dec=0.44887, avg_loss=0.01358, correct=1860/7908, in 1079.83s/epoch (fwd/bck in 1074.32s/epoch)
+upsampling_1 VALIDATION || AUC=0.993737, and AP=0.999081, with best thr=0.407542 at f-measure=0.986 and FP=28, FN=13, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.38 and dec_loss_weight 0.0062
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 32/50 ==> avg_loss_seg=0.75651, avg_loss_dec=0.44733, avg_loss=0.01307, correct=1855/7908, in 1081.24s/epoch (fwd/bck in 1075.72s/epoch)
+upsampling_1 Returning seg_loss_weight 0.36 and dec_loss_weight 0.0064
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 33/50 ==> avg_loss_seg=0.75645, avg_loss_dec=0.44781, avg_loss=0.01259, correct=1856/7908, in 1080.53s/epoch (fwd/bck in 1075.04s/epoch)
+upsampling_1 Returning seg_loss_weight 0.33999999999999997 and dec_loss_weight 0.006600000000000001
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 34/50 ==> avg_loss_seg=0.75641, avg_loss_dec=0.44747, avg_loss=0.01211, correct=1859/7908, in 1080.65s/epoch (fwd/bck in 1075.17s/epoch)
+upsampling_1 Returning seg_loss_weight 0.31999999999999995 and dec_loss_weight 0.0068000000000000005
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 35/50 ==> avg_loss_seg=0.75637, avg_loss_dec=0.44589, avg_loss=0.01162, correct=1859/7908, in 1080.77s/epoch (fwd/bck in 1075.28s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_35.pth
+upsampling_1 Returning seg_loss_weight 0.30000000000000004 and dec_loss_weight 0.006999999999999999
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 36/50 ==> avg_loss_seg=0.75633, avg_loss_dec=0.44511, avg_loss=0.01115, correct=1859/7908, in 1079.63s/epoch (fwd/bck in 1074.11s/epoch)
+upsampling_1 VALIDATION || AUC=0.995353, and AP=0.999312, with best thr=0.429123 at f-measure=0.991 and FP=11, FN=16, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.28 and dec_loss_weight 0.0072
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 37/50 ==> avg_loss_seg=0.75628, avg_loss_dec=0.44424, avg_loss=0.01068, correct=1857/7908, in 1081.04s/epoch (fwd/bck in 1075.51s/epoch)
+upsampling_1 Returning seg_loss_weight 0.26 and dec_loss_weight 0.0074
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 38/50 ==> avg_loss_seg=0.75624, avg_loss_dec=0.44357, avg_loss=0.01021, correct=1857/7908, in 1080.45s/epoch (fwd/bck in 1074.96s/epoch)
+upsampling_1 Returning seg_loss_weight 0.24 and dec_loss_weight 0.0076
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 39/50 ==> avg_loss_seg=0.75623, avg_loss_dec=0.44339, avg_loss=0.00975, correct=1859/7908, in 1080.88s/epoch (fwd/bck in 1075.37s/epoch)
+upsampling_1 Returning seg_loss_weight 0.21999999999999997 and dec_loss_weight 0.0078000000000000005
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 40/50 ==> avg_loss_seg=0.75617, avg_loss_dec=0.44256, avg_loss=0.00929, correct=1858/7908, in 1081.49s/epoch (fwd/bck in 1075.98s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_40.pth
+upsampling_1 Returning seg_loss_weight 0.19999999999999996 and dec_loss_weight 0.008
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 41/50 ==> avg_loss_seg=0.75616, avg_loss_dec=0.44205, avg_loss=0.00883, correct=1859/7908, in 1080.60s/epoch (fwd/bck in 1075.10s/epoch)
+upsampling_1 VALIDATION || AUC=0.994968, and AP=0.999259, with best thr=0.414753 at f-measure=0.989 and FP=15, FN=18, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.18000000000000005 and dec_loss_weight 0.008199999999999999
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 42/50 ==> avg_loss_seg=0.75609, avg_loss_dec=0.44085, avg_loss=0.00837, correct=1862/7908, in 1081.50s/epoch (fwd/bck in 1075.98s/epoch)
+upsampling_1 Returning seg_loss_weight 0.16000000000000003 and dec_loss_weight 0.0084
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 43/50 ==> avg_loss_seg=0.75607, avg_loss_dec=0.44043, avg_loss=0.00792, correct=1858/7908, in 1081.23s/epoch (fwd/bck in 1075.73s/epoch)
+upsampling_1 Returning seg_loss_weight 0.14 and dec_loss_weight 0.0086
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 44/50 ==> avg_loss_seg=0.75606, avg_loss_dec=0.43981, avg_loss=0.00747, correct=1860/7908, in 1080.40s/epoch (fwd/bck in 1074.86s/epoch)
+upsampling_1 Returning seg_loss_weight 0.12 and dec_loss_weight 0.0088
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 45/50 ==> avg_loss_seg=0.75602, avg_loss_dec=0.43908, avg_loss=0.00702, correct=1861/7908, in 1080.45s/epoch (fwd/bck in 1074.95s/epoch)
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/ep_45.pth
+upsampling_1 Returning seg_loss_weight 0.09999999999999998 and dec_loss_weight 0.009000000000000001
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 46/50 ==> avg_loss_seg=0.75599, avg_loss_dec=0.43889, avg_loss=0.00658, correct=1858/7908, in 1080.19s/epoch (fwd/bck in 1074.66s/epoch)
+upsampling_1 VALIDATION || AUC=0.993912, and AP=0.999066, with best thr=0.387175 at f-measure=0.988 and FP=19, FN=16, TOTAL SAMPLES=1695, Dice: mean: 0.110174, std: 0.08880498681865998, Jaccard: mean: 0.060751, std: 0.052336759674705094
+upsampling_1 Returning seg_loss_weight 0.07999999999999996 and dec_loss_weight 0.0092
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 47/50 ==> avg_loss_seg=0.75597, avg_loss_dec=0.43792, avg_loss=0.00613, correct=1859/7908, in 1080.72s/epoch (fwd/bck in 1075.19s/epoch)
+upsampling_1 Returning seg_loss_weight 0.06000000000000005 and dec_loss_weight 0.0094
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 48/50 ==> avg_loss_seg=0.75593, avg_loss_dec=0.43767, avg_loss=0.00569, correct=1860/7908, in 1080.62s/epoch (fwd/bck in 1075.13s/epoch)
+upsampling_1 Returning seg_loss_weight 0.040000000000000036 and dec_loss_weight 0.0096
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 49/50 ==> avg_loss_seg=0.75592, avg_loss_dec=0.43718, avg_loss=0.00524, correct=1861/7908, in 1080.98s/epoch (fwd/bck in 1075.52s/epoch)
+upsampling_1 Returning seg_loss_weight 0.020000000000000018 and dec_loss_weight 0.0098
+upsampling_1 Returning dec_gradient_multiplier 0
+upsampling_1 Epoch 50/50 ==> avg_loss_seg=0.75589, avg_loss_dec=0.43658, avg_loss=0.00480, correct=1862/7908, in 1080.27s/epoch (fwd/bck in 1074.78s/epoch)
+upsampling_1 VALIDATION || AUC=0.993861, and AP=0.999070, with best thr=0.505259 at f-measure=0.988 and FP=18, FN=19, TOTAL SAMPLES=1695, Dice: mean: 0.078992, std: 0.0605670615803795, Jaccard: mean: 0.042186, std: 0.03384845895938826
+upsampling_1 Saving current model state to ./RESULTS/crack_segmentation/upsampling_1/models/final_state_dict.pth
+upsampling_1 Loading model state from ./RESULTS/crack_segmentation/upsampling_1/models/best_state_dict.pth
+TEST: Number of positives: 1483, Number of negatives: 212, Sum: 1695
+upsampling_1 EVAL AUC=0.985903, and AP=0.997871, w/ best thr=0.444417 at f-m=0.986 and FP=38, FN=5, Dice: mean: 0.044467, std: 0.044669224903799695, Jaccard: mean: 0.023292, std: 0.024234791749347995
