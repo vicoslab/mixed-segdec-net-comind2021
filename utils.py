@@ -117,7 +117,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     plt.title('Average Precision=%.4f' % metrics['AP'])
     plt.xlabel('Recall')
     plt.ylabel('Precision')
-    plt.savefig(f"{results_path}/precision-recall", bbox_inches='tight')
+    plt.savefig(f"{results_path}/precision-recall", bbox_inches='tight', dpi=200)
 
     plt.figure(1)
     plt.clf()
@@ -125,7 +125,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     plt.title('AUC=%.4f' % metrics['AUC'])
     plt.xlabel('False positive rate')
     plt.ylabel('True positive rate')
-    plt.savefig(f"{results_path}/ROC", bbox_inches='tight')
+    plt.savefig(f"{results_path}/ROC", bbox_inches='tight', dpi=200)
 
 
 def get_metrics(labels, predictions):
