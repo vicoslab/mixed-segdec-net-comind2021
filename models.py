@@ -63,6 +63,9 @@ class FeatureNorm(nn.Module):
         return self.scale * ((features - f_mean) / (f_std + self.eps).sqrt()) + self.bias
 
 class UpSampling(nn.Module):
+    """
+    UpSampling blok - dekonvolucija(2x povečava resolucije) + konvolucija 
+    """
     def __init__(self, n_conv_blocks, in_channels, out_channels, kernel_size, padding, stride=2):
         super(UpSampling, self).__init__()
         self.upsample = nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride)
@@ -83,11 +86,14 @@ class UpSampling(nn.Module):
         x1 = F.pad(x1, (diffX // 2, diffX - diffX//2, diffY // 2, diffY - diffY//2)) # = torch.Size([1, 64, 112, 112])
         # x1.shape = torch.Size([1, 64, 112, 112])
 
-        x = torch.cat([x2, x1], dim=1)
-        x = self.conv(x)
+        x = torch.cat([x2, x1], dim=1) # x.shape = torch.Size([1, 128, 112, 112])
+        x = self.conv(x) # x.shape = torch.Size([1, 64, 112, 112])
         return x
 
 class DownSampling(nn.Module):
+    """
+    DownSampling blok - na zacetku lahko dodamo MaxPooling
+    """
     def __init__(self, pooling, n_conv_blocks, in_channels, out_channels, kernel_size, padding):
         super(DownSampling, self).__init__()
         self.downsample = nn.Sequential()
