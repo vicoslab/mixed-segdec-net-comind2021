@@ -81,6 +81,9 @@
 ### Validation
 ![loss_val](./loss_val.png)
 
+### Dice and Jaccard
+![dice_jaccard](./dice_jaccard.png)
+
 ## Dices
 
 ### Threshold = 0.29589 (From validation)
