@@ -62,8 +62,8 @@ class End2End:
 
         tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_path) if WRITE_TENSORBOARD else None
 
-        losses, validation_data, threshold, dices_jaccards = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
-        train_results = (losses, validation_data, dices_jaccards)
+        losses, validation_data, threshold, dices_iou = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        train_results = (losses, validation_data, dices_iou)
         self._save_train_results(train_results)
         self._save_model(model)
 
@@ -142,7 +142,7 @@ class End2End:
     def _train_model(self, device, model, train_loader, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, validation_set, tensorboard_writer):
         losses = []
         validation_data = []
-        dices_jaccards = []
+        dices_iou = []
         threshold = 0
         max_validation = -1
         validation_step = self.cfg.VALIDATION_N_EPOCHS
@@ -204,9 +204,9 @@ class End2End:
                 tensorboard_writer.add_scalar("Accuracy/Train/", epoch_correct / samples_per_epoch, epoch)
 
             if self.cfg.VALIDATE and (epoch % validation_step == 0 or epoch == num_epochs - 1):
-                validation_ap, validation_accuracy, threshold, dice, jaccard = self.eval_model(device, model, validation_set, None, False, True, False, None)
+                validation_ap, validation_accuracy, threshold, dice, iou = self.eval_model(device, model, validation_set, None, False, True, False, None)
                 validation_data.append((validation_ap, epoch))
-                dices_jaccards.append((epoch, dice, jaccard))
+                dices_iou.append((epoch, dice, iou))
 
                 if validation_ap > max_validation:
                     max_validation = validation_ap
@@ -216,7 +216,7 @@ class End2End:
                 if tensorboard_writer is not None:
                     tensorboard_writer.add_scalar("Accuracy/Validation/", validation_accuracy, epoch)
 
-        return losses, validation_data, threshold, dices_jaccards
+        return losses, validation_data, threshold, dices_iou
 
     def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg, threshold):
         model.eval()
@@ -269,11 +269,11 @@ class End2End:
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
-            dice_mean, dice_std, jaccard_mean, jaccard_std = utils.dice_jaccard(predicted_segs, true_segs, metrics['best_thr'])
+            dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, metrics['best_thr'])
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
-                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std:f}")
+                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}")
 
-            return metrics["AP"], metrics["accuracy"], metrics['best_thr'], dice_mean, jaccard_mean
+            return metrics["AP"], metrics["accuracy"], metrics['best_thr'], dice_mean, iou_mean
         else:
             utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, threshold)
 
@@ -322,7 +322,7 @@ class End2End:
             f.writelines(params_lines)
 
     def _save_train_results(self, results):
-        losses, validation_data, dices_jaccards = results
+        losses, validation_data, dices_iou = results
         ls, ld, l, le = map(list, zip(*losses))
         plt.plot(le, l, label="Loss", color="red")
         plt.plot(le, ls, label="Loss seg")
@@ -345,15 +345,15 @@ class End2End:
             df_loss = pd.DataFrame(data={"validation_data": ls, "loss_dec": ld, "loss": l, "epoch": le})
             df_loss.to_csv(os.path.join(self.run_path, "losses.csv"), index=False)
         
-        # Dice & Jaccard plot
-        epochs, dices, jaccards = map(list, zip(*dices_jaccards))
+        # Dice & IOU plot
+        epochs, dices, iou = map(list, zip(*dices_iou))
         plt.clf()
         plt.plot(epochs, dices, label="Dice")
-        plt.plot(epochs, jaccards, label="Jaccard")
+        plt.plot(epochs, iou, label="IOU")
         plt.xlabel("Epochs")
         plt.ylabel("Dice")
         plt.legend()
-        plt.savefig(os.path.join(self.run_path, "dice_jaccard"), dpi=200)
+        plt.savefig(os.path.join(self.run_path, "dice_iou"), dpi=200)
 
         # Loss plot
         # Loss

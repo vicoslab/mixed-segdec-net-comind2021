@@ -95,7 +95,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     labels = samples[:, 3].astype(np.float32)
 
     metrics = get_metrics(labels, predictions)
-    dice_mean, dice_std, jaccard_mean, jaccard_std = dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images, img_names, results_path)
+    dice_mean, dice_std, iou_mean, iou_std = dice_iou(segmentation_predicted, segmentation_truth, threshold, images, img_names, results_path)
 
     df = pd.DataFrame(
         data={'prediction': predictions,
@@ -105,7 +105,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     df.to_csv(os.path.join(results_path, 'results.csv'), index=False)
 
     print(
-        f'{run_name} EVAL AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std}, Jaccard: mean: {jaccard_mean:f}, std: {jaccard_std}')
+        f'{run_name} EVAL AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std}, IOU: mean: {iou_mean:f}, std: {iou_std}')
 
     with open(os.path.join(results_path, 'metrics.pkl'), 'wb') as f:
         pickle.dump(metrics, f)
@@ -159,10 +159,10 @@ def get_metrics(labels, predictions):
     metrics['accuracy'] = (sum(TP) + sum(TN)) / (sum(TP) + sum(TN) + sum(FP) + sum(FN))
     return metrics
 
-def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=None, image_names=None, run_path=None):
+def dice_iou(segmentation_predicted, segmentation_truth, threshold, images=None, image_names=None, run_path=None):
 
     results_dice = []
-    result_jaccard = []
+    result_iou = []
 
     # Preverimo ali so vsi listi enako dolgi
     if images is not None:
@@ -177,7 +177,7 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
         save_folder = f"{run_path}/dices"
         create_folder(save_folder)
 
-    # Za vsak par izračunamo dice in jaccard
+    # Za vsak par izračunamo dice in IOU
     for i in range(len(segmentation_predicted)):
         seg_pred = segmentation_predicted[i]
         seg_true_bin = segmentation_truth[i]
@@ -189,11 +189,11 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
         dice = (2 * (seg_true_bin * seg_pred_bin).sum() + 1e-15) / (seg_true_bin.sum() + seg_pred_bin.sum() + 1e-15)
         results_dice += [dice]
 
-        # Jaccard
+        # IOU
         intersection = (seg_pred_bin * seg_true_bin).sum()
         union = seg_pred_bin.sum() + seg_true_bin.sum() - intersection
-        jaccard = (intersection + 1e-15) / (union + 1e-15)
-        result_jaccard += [jaccard]
+        iou = (intersection + 1e-15) / (union + 1e-15)
+        result_iou += [iou]
 
         # Vizualizacija
         if images is not None:
@@ -220,7 +220,7 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.yticks([])
             plt.title('Segmentation')
             plt.imshow(seg_pred, cmap='gray', vmin=0, vmax=1) # Popravljeno z vmin in vmax argumenti
-            plt.xlabel(f"Jaccard: {round(jaccard, 5)}")
+            plt.xlabel(f"IOU: {round(iou, 5)}")
             
             plt.subplot(1, 4, 4)
             plt.xticks([])
@@ -231,5 +231,5 @@ def dice_jaccard(segmentation_predicted, segmentation_truth, threshold, images=N
             plt.savefig(f"{save_folder}/{round(dice, 3):.3f}_dice_{image_name}.png", bbox_inches='tight', dpi=300)
             plt.close()
 
-    # Vrnemo povprečno vrednost ter standardno deviacijo za dice in jaccard
-    return np.mean(results_dice), np.std(results_dice), np.mean(result_jaccard), np.std(result_jaccard)
+    # Vrnemo povprečno vrednost ter standardno deviacijo za dice in IOU
+    return np.mean(results_dice), np.std(results_dice), np.mean(result_iou), np.std(result_iou)
