@@ -229,7 +229,7 @@ class End2End:
         images, predicted_segs, true_segs = [], [], []
 
         for data_point in eval_loader:
-            image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original, _ = data_point
+            image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original, seg_loss_mask_original = data_point
             image, seg_mask = image.to(device), seg_mask.to(device)
             is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
             prediction, pred_seg, pred_seg_upsampled = model(image)
@@ -261,10 +261,10 @@ class End2End:
             if not is_validation:
                 if save_images:
                     if self.cfg.WEIGHTED_SEG_LOSS:
-                        seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
+                        #seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
+                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
                     else:
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_mask, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg, seg_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
 
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
