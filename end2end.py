@@ -262,18 +262,19 @@ class End2End:
                 if save_images:
                     if self.cfg.WEIGHTED_SEG_LOSS:
                         #seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask_original.numpy()[0][0], save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
                     else:
                         utils.plot_sample(sample_name[0], image, pred_seg, seg_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
 
         if is_validation:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
+            dice_metrics = utils.get_metrics(np.array(true_segs, dtype=bool).flatten(), np.array(predicted_segs).flatten())
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
-            dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, metrics['best_thr'])
+            dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, dice_metrics['best_thr'])
             self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}")
 
-            return metrics["AP"], metrics["accuracy"], metrics['best_thr'], dice_mean, iou_mean
+            return metrics["AP"], metrics["accuracy"], dice_metrics['best_thr'], dice_mean, iou_mean
         else:
             utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, threshold)
 
