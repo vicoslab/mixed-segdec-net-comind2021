@@ -76,11 +76,10 @@ class End2End:
 
     def eval(self, model, device, save_images, plot_seg, reload_final, dice_threshold, eval_loader=None):
         self.reload_model(model, reload_final)
+        is_validation = True
         if eval_loader is None:
             eval_loader = get_dataset("TEST", self.cfg)
             is_validation = False
-        else:
-            is_validation = True
         self.eval_model(device, model, eval_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=is_validation, plot_seg=plot_seg, dice_threshold=dice_threshold)
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
