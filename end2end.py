@@ -237,8 +237,8 @@ class End2End:
             image, seg_mask = image.to(device), seg_mask.to(device)
             is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
             prediction, pred_seg, pred_seg_upsampled = model(image)
-            pred_seg = nn.Sigmoid()(pred_seg)
             prediction = nn.Sigmoid()(prediction)
+            pred_seg = nn.Sigmoid()(pred_seg)
             pred_seg_upsampled = nn.Sigmoid()(pred_seg_upsampled)
 
             prediction = prediction.item()
@@ -250,7 +250,6 @@ class End2End:
             image = cv2.resize(np.transpose(image[0, :, :, :], (1, 2, 0)), dsize)
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             pred_seg = cv2.resize(pred_seg[0, 0, :, :], dsize) if len(pred_seg.shape) == 4 else cv2.resize(pred_seg[0, :, :], dsize)
-            seg_mask = cv2.resize(seg_mask[0, 0, :, :], dsize)
 
             predictions.append(prediction)
             ground_truths.append(is_pos)

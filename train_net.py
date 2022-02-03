@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument('--SAVE_IMAGES', type=str2bool, default=None, help="Save test images or not.")
 
     parser.add_argument('--DICE_THRESHOLD', type=int, default=1, required=False, help="Method of selecting dice threshold.")
-    parser.add_argument('--DICE_THRESHOLD_SUBSAMPLING_FACTOR', type=int, default=10, required=False, help="Factor of subsampling if dice threshold is 2. Set 1 for no subsampling.")
+    parser.add_argument('--DICE_THR_FACTOR', type=int, default=10, required=False, help="Factor of subsampling if dice threshold is 2. Set 1 for no subsampling.")
 
     args = parser.parse_args()
 

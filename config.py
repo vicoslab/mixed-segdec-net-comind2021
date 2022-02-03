@@ -44,6 +44,10 @@ class Config:
     INPUT_HEIGHT = None
     INPUT_CHANNELS = None
 
+    # Dice threshold parameters
+    DICE_THRESHOLD = 1 # Method of selecting dice threshold
+    DICE_THR_FACTOR = 10 # Factor of subsampling if dice threshold is 2. Set 1 for no subsampling
+
     def init_extra(self):
         if self.WEIGHTED_SEG_LOSS and (self.WEIGHTED_SEG_LOSS_P is None or self.WEIGHTED_SEG_LOSS_MAX is None):
             raise Exception("You also need to specify p and scaling factor for weighted segmentation loss!")
@@ -116,6 +120,9 @@ class Config:
         self.FREQUENCY_SAMPLING = args.FREQUENCY_SAMPLING
         self.NUM_SEGMENTED = args.NUM_SEGMENTED
 
+        self.DICE_THRESHOLD = args.DICE_THRESHOLD
+        self.DICE_THR_FACTOR = args.DICE_THR_FACTOR
+
         if args.FOLD is not None: self.FOLD = args.FOLD
         if args.TRAIN_NUM is not None: self.TRAIN_NUM = args.TRAIN_NUM
         if args.RESULTS_PATH is not None: self.RESULTS_PATH = args.RESULTS_PATH
@@ -160,6 +167,8 @@ class Config:
             "INPUT_CHANNELS": self.INPUT_CHANNELS,
             "SAVE_IMAGES": self.SAVE_IMAGES,
             "DILATE": self.DILATE,
+            "DICE_THRESHOLD": self.DICE_THRESHOLD,
+            "DICE_THR_FACTOR": self.DICE_THR_FACTOR
         }
         return params
 
@@ -196,5 +205,7 @@ def load_from_dict(dictionary):
     cfg.INPUT_CHANNELS = dictionary.get("INPUT_CHANNELS", None)
     cfg.SAVE_IMAGES = dictionary.get("SAVE_IMAGES", None)
     cfg.DILATE = dictionary.get("DILATE", None)
+    cfg.DICE_THRESHOLD = dictionary.get("DICE_THRESHOLD", None)
+    cfg.DICE_THR_FACTOR = dictionary.get("DICE_THR_FACTOR", None)
 
     return cfg
