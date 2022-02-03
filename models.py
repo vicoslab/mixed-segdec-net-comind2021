@@ -66,14 +66,14 @@ class UpSampling(nn.Module):
     """
     UpSampling blok - dekonvolucija(2x povečava resolucije) + konvolucija 
     """
-    def __init__(self, n_conv_blocks, in_channels, out_channels, kernel_size, padding, stride=2):
+    def __init__(self, n_conv_blocks, in_channels, out_channels, n_channels_connected, kernel_size, padding, stride=2):
         super(UpSampling, self).__init__()
         self.upsample = nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, stride=stride)
         self.conv = nn.Sequential()
 
         for i in range(n_conv_blocks):
             if i == 0:
-                self.conv.add_module(f'conv_block_{i+1}', _conv_block(out_channels * 2, out_channels, kernel_size, padding))
+                self.conv.add_module(f'conv_block_{i+1}', _conv_block(n_channels_connected + out_channels, out_channels, kernel_size, padding))
             else:
                 self.conv.add_module(f'conv_block_{i+1}', _conv_block(out_channels, out_channels, kernel_size, padding))
 
@@ -149,9 +149,9 @@ class SegDecNet(nn.Module):
         self.device = device
 
         # Upsampling
-        self.upsampling1 = UpSampling(n_conv_blocks=1, in_channels=1024, out_channels=16, kernel_size=5, padding=2)
-        self.upsampling2 = UpSampling(n_conv_blocks=4, in_channels=16, out_channels=16, kernel_size=5, padding=2)
-        self.upsampling3 = UpSampling(n_conv_blocks=3, in_channels=16, out_channels=8, kernel_size=5, padding=2)
+        self.upsampling1 = UpSampling(n_conv_blocks=1, in_channels=1024, out_channels=16, n_channels_connected=64, kernel_size=5, padding=2)
+        self.upsampling2 = UpSampling(n_conv_blocks=4, in_channels=16, out_channels=16, n_channels_connected=64, kernel_size=5, padding=2)
+        self.upsampling3 = UpSampling(n_conv_blocks=3, in_channels=16, out_channels=8, n_channels_connected=32, kernel_size=5, padding=2)
         self.upsampling4 = nn.Sequential(Conv2d_init(in_channels=8, out_channels=1, kernel_size=5, padding=2, bias=False), FeatureNorm(num_features=1, eps=0.001, include_bias=False))
 
     def set_gradient_multipliers(self, multiplier):
