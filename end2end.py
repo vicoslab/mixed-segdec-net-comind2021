@@ -70,7 +70,7 @@ class End2End:
         self.eval(model=model, device=device, save_images=self.cfg.SAVE_IMAGES, plot_seg=False, reload_final=False, dice_threshold=dice_threshold)
 
         # Dodana evalvacija na TRAIN setu
-        self.eval(model=model, device=device, save_images=self.cfg.SAVE_IMAGES, plot_seg=False, reload_final=False, dice_threshold=dice_threshold, eval_loader=train_loader)
+        self.eval(model=model, device=device, save_images=False, plot_seg=False, reload_final=False, dice_threshold=dice_threshold, eval_loader=train_loader)
 
         self._save_params()
 
@@ -78,7 +78,10 @@ class End2End:
         self.reload_model(model, reload_final)
         if eval_loader is None:
             eval_loader = get_dataset("TEST", self.cfg)
-        self.eval_model(device, model, eval_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=False, plot_seg=plot_seg, dice_threshold=dice_threshold)
+            is_validation = False
+        else:
+            is_validation = True
+        self.eval_model(device, model, eval_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=is_validation, plot_seg=plot_seg, dice_threshold=dice_threshold)
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
@@ -285,8 +288,8 @@ class End2End:
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
             FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
             dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, dice_threshold)
-            self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
-                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}")
+            self._log(f"VALIDATION on {eval_loader.dataset.kind} set || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
+                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}\nDice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}")
 
             return metrics["AP"], metrics["accuracy"], dice_threshold, dice_mean, iou_mean
         else:
