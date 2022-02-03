@@ -1,4 +1,2 @@
-./results/crack_segmentation/run_100/models/
-./results/crack_segmentation/run_100/test_outputs/
 runs.txt
 manual_eval.py
