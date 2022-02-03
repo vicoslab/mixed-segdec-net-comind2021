@@ -62,19 +62,23 @@ class End2End:
 
         tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_path) if WRITE_TENSORBOARD else None
 
-        losses, validation_data, threshold, dices_iou = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        losses, validation_data, dice_threshold, dices_iou = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
         train_results = (losses, validation_data, dices_iou)
         self._save_train_results(train_results)
         self._save_model(model)
 
-        self.eval(model, device, self.cfg.SAVE_IMAGES, False, False, threshold)
+        self.eval(model=model, device=device, save_images=self.cfg.SAVE_IMAGES, plot_seg=False, reload_final=False, dice_threshold=dice_threshold)
+
+        # Dodana evalvacija na TRAIN setu
+        self.eval(model=model, device=device, save_images=self.cfg.SAVE_IMAGES, plot_seg=False, reload_final=False, dice_threshold=dice_threshold, eval_loader=train_loader)
 
         self._save_params()
 
-    def eval(self, model, device, save_images, plot_seg, reload_final, threshold):
+    def eval(self, model, device, save_images, plot_seg, reload_final, dice_threshold, eval_loader=None):
         self.reload_model(model, reload_final)
-        test_loader = get_dataset("TEST", self.cfg)
-        self.eval_model(device, model, test_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=False, plot_seg=plot_seg, threshold=threshold)
+        if eval_loader is None:
+            eval_loader = get_dataset("TEST", self.cfg)
+        self.eval_model(device, model, eval_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=False, plot_seg=plot_seg, dice_threshold=dice_threshold)
 
     def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
@@ -143,7 +147,7 @@ class End2End:
         losses = []
         validation_data = []
         dices_iou = []
-        threshold = 0
+        dice_threshold = 0
         max_validation = -1
         validation_step = self.cfg.VALIDATION_N_EPOCHS
 
@@ -204,7 +208,7 @@ class End2End:
                 tensorboard_writer.add_scalar("Accuracy/Train/", epoch_correct / samples_per_epoch, epoch)
 
             if self.cfg.VALIDATE and (epoch % validation_step == 0 or epoch == num_epochs - 1):
-                validation_ap, validation_accuracy, threshold, dice, iou = self.eval_model(device, model, validation_set, None, False, True, False, None)
+                validation_ap, validation_accuracy, dice_threshold, dice, iou = self.eval_model(device=device, model=model, eval_loader=validation_set, save_folder=None, save_images=False, is_validation=True, plot_seg=False, dice_threshold=None)
                 validation_data.append((validation_ap, epoch))
                 dices_iou.append((epoch, dice, iou))
 
@@ -216,9 +220,9 @@ class End2End:
                 if tensorboard_writer is not None:
                     tensorboard_writer.add_scalar("Accuracy/Validation/", validation_accuracy, epoch)
 
-        return losses, validation_data, threshold, dices_iou
+        return losses, validation_data, dice_threshold, dices_iou
 
-    def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg, threshold):
+    def eval_model(self, device, model, eval_loader, save_folder, save_images, is_validation, plot_seg, dice_threshold):
         model.eval()
 
         dsize = self.cfg.INPUT_WIDTH, self.cfg.INPUT_HEIGHT
@@ -267,16 +271,27 @@ class End2End:
                         utils.plot_sample(sample_name[0], image, pred_seg, seg_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
 
         if is_validation:
-            metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
-            dice_metrics = utils.get_metrics(np.array(true_segs, dtype=bool).flatten(), np.array(predicted_segs).flatten())
-            FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
-            dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, dice_metrics['best_thr'])
-            self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
-                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}")
+            # Računanje dice thresholda
+            # 1. Minimum maksimalnih pikslov vseh predikcij
+            if self.cfg.DICE_THRESHOLD == 1:
+                max_pixels = np.amax(np.amax(np.array(predicted_segs), axis=1), axis=1) # Max piksli vseh predicted segmentacij
+                min_pixel_of_max_pixels = max_pixels.min().item() # Min piksel vseh max pikslov
+                dice_threshold = min_pixel_of_max_pixels
+            
+            # 2. precision_recall, subsampling
+            elif self.cfg.DICE_THRESHOLD == 2:
+                dice_metrics = utils.get_metrics(np.array(true_segs, dtype=bool).flatten()[::self.cfg.DICE_THRESHOLD_SUBSAMPLING_FACTOR], np.array(predicted_segs).flatten()[::self.cfg.DICE_THRESHOLD_SUBSAMPLING_FACTOR]) # vsak 10. piksel GT-jev damo v 1D bool array, vsak 10. piksel predicted segmentacij v 1D float array
+                dice_threshold = dice_metrics['best_thr']
 
-            return metrics["AP"], metrics["accuracy"], dice_metrics['best_thr'], dice_mean, iou_mean
+            metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
+            FP, FN, TP, TN = list(map(sum, [metrics["FP"], metrics["FN"], metrics["TP"], metrics["TN"]]))
+            dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, dice_threshold)
+            self._log(f"VALIDATION || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
+                      f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}")
+
+            return metrics["AP"], metrics["accuracy"], dice_threshold, dice_mean, iou_mean
         else:
-            utils.evaluate_metrics(res, self.run_path, self.run_name, predicted_segs, true_segs, images, threshold)
+            utils.evaluate_metrics(samples=res, results_path=self.run_path, run_name=self.run_name, segmentation_predicted=predicted_segs, segmentation_truth=true_segs, images=images, dice_threshold=dice_threshold, dataset_kind=eval_loader.dataset.kind)
 
     def get_dec_gradient_multiplier(self):
         if self.cfg.GRADIENT_ADJUSTMENT:

@@ -87,7 +87,7 @@ def plot_sample(image_name, image, segmentation, label, save_dir, pred_seg_upsam
         cv2.imwrite(f"{save_dir}/{out_prefix}_segmentation_{image_name}.png", jet_seg)
 
 
-def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images, threshold):
+def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, segmentation_truth, images, dice_threshold, dataset_kind):
     samples = np.array(samples)
 
     img_names = samples[:, 4]
@@ -95,7 +95,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     labels = samples[:, 3].astype(np.float32)
 
     metrics = get_metrics(labels, predictions)
-    dice_mean, dice_std, iou_mean, iou_std = dice_iou(segmentation_predicted, segmentation_truth, threshold, images, img_names, results_path)
+    dice_mean, dice_std, iou_mean, iou_std = dice_iou(segmentation_predicted, segmentation_truth, dice_threshold, images, img_names, results_path)
 
     df = pd.DataFrame(
         data={'prediction': predictions,
@@ -105,7 +105,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     df.to_csv(os.path.join(results_path, 'results.csv'), index=False)
 
     print(
-        f'{run_name} EVAL AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std}, IOU: mean: {iou_mean:f}, std: {iou_std}')
+        f'{run_name} EVAL on {dataset_kind} AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}')
 
     with open(os.path.join(results_path, 'metrics.pkl'), 'wb') as f:
         pickle.dump(metrics, f)
