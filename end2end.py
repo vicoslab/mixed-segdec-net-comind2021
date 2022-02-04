@@ -281,7 +281,7 @@ class End2End:
             
             # 2. precision_recall, subsampling
             elif self.cfg.DICE_THRESHOLD == 2:
-                dice_metrics = utils.get_metrics(np.array(true_segs, dtype=bool).flatten()[::self.cfg.DICE_THRESHOLD_SUBSAMPLING_FACTOR], np.array(predicted_segs).flatten()[::self.cfg.DICE_THRESHOLD_SUBSAMPLING_FACTOR]) # vsak 10. piksel GT-jev damo v 1D bool array, vsak 10. piksel predicted segmentacij v 1D float array
+                dice_metrics = utils.get_metrics(np.array(true_segs, dtype=bool).flatten()[::self.cfg.DICE_THR_FACTOR], np.array(predicted_segs).flatten()[::self.cfg.DICE_THR_FACTOR]) # vsak 10. piksel GT-jev damo v 1D bool array, vsak 10. piksel predicted segmentacij v 1D float array
                 dice_threshold = dice_metrics['best_thr']
 
             metrics = utils.get_metrics(np.array(ground_truths), np.array(predictions))
