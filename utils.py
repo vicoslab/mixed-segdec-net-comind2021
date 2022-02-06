@@ -105,7 +105,7 @@ def evaluate_metrics(samples, results_path, run_name, segmentation_predicted, se
     df.to_csv(os.path.join(results_path, 'results.csv'), index=False)
 
     print(
-        f'{run_name} EVAL on {dataset_kind} AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}, Dice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}')
+        f'{run_name} EVAL on {dataset_kind} AUC={metrics["AUC"]:f}, and AP={metrics["AP"]:f}, w/ best thr={metrics["best_thr"]:f} at f-m={metrics["best_f_measure"]:.3f} and FP={sum(metrics["FP"]):d}, FN={sum(metrics["FN"]):d}\nDice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}')
 
     with open(os.path.join(results_path, 'metrics.pkl'), 'wb') as f:
         pickle.dump(metrics, f)
