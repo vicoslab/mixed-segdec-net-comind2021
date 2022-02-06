@@ -233,6 +233,7 @@ class End2End:
         predictions, ground_truths = [], []
 
         images, predicted_segs, true_segs = [], [], []
+        predicted_segs_pos, predicted_segs_neg = [], []
 
         for data_point in eval_loader:
             image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original, seg_loss_mask_original = data_point
@@ -260,6 +261,10 @@ class End2End:
             pred_seg_upsampled = pred_seg_upsampled[0][0]
             seg_mask_original = seg_mask_original.numpy()[0][0]
             predicted_segs.append(pred_seg_upsampled)
+            if is_pos:
+                predicted_segs_pos.append(pred_seg_upsampled)
+            else:
+                predicted_segs_neg.append(pred_seg_upsampled)
             true_segs.append(seg_mask_original)
             images.append(image)
 
@@ -275,9 +280,13 @@ class End2End:
             # Računanje dice thresholda
             # 1. Minimum maksimalnih pikslov vseh predikcij
             if self.cfg.DICE_THRESHOLD == 1:
-                max_pixels = np.amax(np.amax(np.array(predicted_segs), axis=1), axis=1) # Max piksli vseh predicted segmentacij
-                min_pixel_of_max_pixels = max_pixels.min().item() # Min piksel vseh max pikslov
-                dice_threshold = min_pixel_of_max_pixels
+                max_pixels_pos = np.amax(np.amax(np.array(predicted_segs_pos), axis=1), axis=1) # Max piksli pozitivnih predicted segmentacij
+                min_pixel_of_max_pixels_pos = max_pixels_pos.min().item() # Min piksel vseh max pikslov
+                
+                max_pixels_neg = np.amax(np.amax(np.array(predicted_segs_neg), axis=1), axis=1) # Max piksli negativnih predicted segmentacij
+                min_pixel_of_max_pixels_neg = max_pixels_neg.min().item() # Min piksel vseh max pikslov
+                
+                dice_threshold = min_pixel_of_max_pixels_pos
             
             # 2. precision_recall, subsampling
             elif self.cfg.DICE_THRESHOLD == 2:
@@ -289,6 +298,9 @@ class End2End:
             dice_mean, dice_std, iou_mean, iou_std = utils.dice_iou(predicted_segs, true_segs, dice_threshold)
             self._log(f"VALIDATION on {eval_loader.dataset.kind} set || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}\nDice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}")
+            
+            if self.cfg.DICE_THRESHOLD == 1:
+                self._log(f"Min of max pixels: POSITIVE: {min_pixel_of_max_pixels_pos}, NEGATIVE: {min_pixel_of_max_pixels_neg}")
 
             return metrics["AP"], metrics["accuracy"], dice_threshold, dice_mean, iou_mean
         else:
