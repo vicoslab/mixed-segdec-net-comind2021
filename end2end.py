@@ -301,7 +301,7 @@ class End2End:
             
             # Dodaten izpis minimumov
             if self.cfg.DICE_THRESHOLD == 1:
-                print(f"Min of max pixels: POSITIVE: {min_pixel_of_max_pixels_pos}, NEGATIVE: {min_pixel_of_max_pixels_neg}")
+                print(f"Min of max pixels: POSITIVE: {min_pixel_of_max_pixels_pos:f}, NEGATIVE: {min_pixel_of_max_pixels_neg:f}")
 
             return metrics["AP"], metrics["accuracy"], dice_threshold, dice_mean, iou_mean
         else:
