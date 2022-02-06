@@ -299,8 +299,9 @@ class End2End:
             self._log(f"VALIDATION on {eval_loader.dataset.kind} set || AUC={metrics['AUC']:f}, and AP={metrics['AP']:f}, with best thr={metrics['best_thr']:f} "
                       f"at f-measure={metrics['best_f_measure']:.3f} and FP={FP:d}, FN={FN:d}, TOTAL SAMPLES={FP + FN + TP + TN:d}\nDice: mean: {dice_mean:f}, std: {dice_std:f}, IOU: mean: {iou_mean:f}, std: {iou_std:f}, Dice Threshold: {dice_threshold:f}")
             
+            # Dodaten izpis minimumov
             if self.cfg.DICE_THRESHOLD == 1:
-                self._log(f"Min of max pixels: POSITIVE: {min_pixel_of_max_pixels_pos}, NEGATIVE: {min_pixel_of_max_pixels_neg}")
+                print(f"Min of max pixels: POSITIVE: {min_pixel_of_max_pixels_pos}, NEGATIVE: {min_pixel_of_max_pixels_neg}")
 
             return metrics["AP"], metrics["accuracy"], dice_threshold, dice_mean, iou_mean
         else:
