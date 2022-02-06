@@ -54,15 +54,12 @@ class End2End:
         optimizer = self._get_optimizer(model)
         loss_seg, loss_dec = self._get_loss(True), self._get_loss(False)
 
-        # Nov segmentacijski loss - BCEWithLogitsLoss
-        loss_seg_upsampled = self._get_loss(True)
-
         train_loader = get_dataset("TRAIN", self.cfg)
         validation_loader = get_dataset("VAL", self.cfg)
 
         tensorboard_writer = SummaryWriter(log_dir=self.tensorboard_path) if WRITE_TENSORBOARD else None
 
-        losses, validation_data, dice_threshold, dices_iou = self._train_model(device, model, train_loader, loss_seg, loss_seg_upsampled, loss_dec, optimizer, validation_loader, tensorboard_writer)
+        losses, validation_data, dice_threshold, dices_iou = self._train_model(device, model, train_loader, loss_seg, loss_dec, optimizer, validation_loader, tensorboard_writer)
         train_results = (losses, validation_data, dices_iou)
         self._save_train_results(train_results)
         self._save_model(model)
@@ -82,9 +79,9 @@ class End2End:
             is_validation = False
         self.eval_model(device, model, eval_loader, save_folder=self.outputs_path, save_images=save_images, is_validation=is_validation, plot_seg=plot_seg, dice_threshold=dice_threshold)
 
-    def training_iteration(self, data, device, model, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
+    def training_iteration(self, data, device, model, criterion_seg, criterion_dec, optimizer, weight_loss_seg, weight_loss_dec,
                            tensorboard_writer, iter_index):
-        images, seg_masks, seg_loss_masks, is_segmented, _, seg_mask_bins, seg_loss_mask_bins = data
+        images, is_segmented, _, seg_mask_bins, seg_loss_mask_bins = data
 
         batch_size = self.cfg.BATCH_SIZE
         memory_fit = self.cfg.MEMORY_FIT  # Not supported yet for >1
@@ -101,34 +98,28 @@ class End2End:
 
         for sub_iter in range(num_subiters):
             images_ = images[sub_iter * memory_fit:(sub_iter + 1) * memory_fit, :, :, :].to(device)
-            seg_masks_ = seg_masks[sub_iter * memory_fit:(sub_iter + 1) * memory_fit, :, :, :].to(device)
-            seg_loss_masks_ = seg_loss_masks[sub_iter * memory_fit:(sub_iter + 1) * memory_fit, :, :, :].to(device)
             seg_mask_bins_ = seg_mask_bins[sub_iter * memory_fit:(sub_iter + 1) * memory_fit, :, :, :].to(device)
             seg_loss_mask_bins_ = seg_loss_mask_bins[sub_iter * memory_fit:(sub_iter + 1) * memory_fit, :, :, :].to(device)
-            is_pos_ = seg_masks_.max().reshape((memory_fit, 1)).to(device)
+            is_pos_ = seg_mask_bins_.max().reshape((memory_fit, 1)).to(device)
 
             if tensorboard_writer is not None and iter_index % 100 == 0:
                 tensorboard_writer.add_image(f"{iter_index}/image", images_[0, :, :, :])
-                tensorboard_writer.add_image(f"{iter_index}/seg_mask", seg_masks[0, :, :, :])
-                tensorboard_writer.add_image(f"{iter_index}/seg_loss_mask", seg_loss_masks_[0, :, :, :])
 
-            decision, output_seg_mask, seg_mask_upsampled = model(images_)
+            decision, seg_mask_upsampled = model(images_)
 
             if is_segmented[sub_iter]:
                 if self.cfg.WEIGHTED_SEG_LOSS:
-                    loss_seg = torch.mean(criterion_seg(output_seg_mask, seg_masks_) * seg_loss_masks_)
-                    loss_seg_upsampling = torch.mean(criterion_seg_upsampled(seg_mask_upsampled, seg_mask_bins_) * seg_loss_mask_bins_) # Loss funkcija za upsamplano segmentacijo (BCE)
+                    loss_seg = torch.mean(criterion_seg(seg_mask_upsampled, seg_mask_bins_) * seg_loss_mask_bins_) # Loss funkcija za upsamplano segmentacijo (BCE)
                 else:
-                    loss_seg = criterion_seg(output_seg_mask, seg_masks_)
-                    loss_seg_upsampling = criterion_seg_upsampled(seg_mask_upsampled, seg_mask_bins_)                                   # Loss funkcija za upsamplano segmentacijo (BCE)
+                    loss_seg = criterion_seg(seg_mask_upsampled, seg_mask_bins_)                                   # Loss funkcija za upsamplano segmentacijo (BCE)
                 loss_dec = criterion_dec(decision, is_pos_)
 
                 # Loss funkcijo za upsamplano segmentacijo prištejem skupnemu lossu za segmentacijo
-                total_loss_seg += loss_seg.item() + loss_seg_upsampling.item()
+                total_loss_seg += loss_seg.item()
                 total_loss_dec += loss_dec.item()
 
                 total_correct += (decision > 0.0).item() == is_pos_.item()
-                loss = weight_loss_seg * (loss_seg + loss_seg_upsampling) + weight_loss_dec * loss_dec # Dodal loss_seg_upsampling
+                loss = weight_loss_seg * loss_seg + weight_loss_dec * loss_dec # Dodal loss_seg_upsampling
             else:
                 loss_dec = criterion_dec(decision, is_pos_)
                 total_loss_dec += loss_dec.item()
@@ -145,7 +136,7 @@ class End2End:
 
         return total_loss_seg, total_loss_dec, total_loss, total_correct
 
-    def _train_model(self, device, model, train_loader, criterion_seg, criterion_seg_upsampled, criterion_dec, optimizer, validation_set, tensorboard_writer):
+    def _train_model(self, device, model, train_loader, criterion_seg, criterion_dec, optimizer, validation_set, tensorboard_writer):
         losses = []
         validation_data = []
         dices_iou = []
@@ -178,7 +169,6 @@ class End2End:
                 start_1 = timer()
                 curr_loss_seg, curr_loss_dec, curr_loss, correct = self.training_iteration(data, device, model,
                                                                                            criterion_seg,
-                                                                                           criterion_seg_upsampled,
                                                                                            criterion_dec,
                                                                                            optimizer, weight_loss_seg,
                                                                                            weight_loss_dec,
@@ -236,30 +226,27 @@ class End2End:
         predicted_segs_pos, predicted_segs_neg = [], []
 
         for data_point in eval_loader:
-            image, seg_mask, seg_loss_mask, _, sample_name, seg_mask_original, seg_loss_mask_original = data_point
-            image, seg_mask = image.to(device), seg_mask.to(device)
-            is_pos = (seg_mask.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
-            prediction, pred_seg, pred_seg_upsampled = model(image)
+            image, _, sample_name, seg_mask_original, seg_loss_mask_original = data_point
+            image, seg_mask_original = image.to(device), seg_mask_original.to(device)
+            is_pos = (seg_mask_original.max() > 0).reshape((1, 1)).to(device).item() # Bool - seg_mask pozitivna ali ne
+            prediction, pred_seg_upsampled = model(image)
             prediction = nn.Sigmoid()(prediction)
-            pred_seg = nn.Sigmoid()(pred_seg)
             pred_seg_upsampled = nn.Sigmoid()(pred_seg_upsampled)
 
             prediction = prediction.item()
             image = image.detach().cpu().numpy()
-            pred_seg = pred_seg.detach().cpu().numpy()
-            seg_mask = seg_mask.detach().cpu().numpy()
+            seg_mask_original = seg_mask_original.detach().cpu().numpy()
             pred_seg_upsampled = pred_seg_upsampled.detach().cpu().numpy()
 
             image = cv2.resize(np.transpose(image[0, :, :, :], (1, 2, 0)), dsize)
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-            pred_seg = cv2.resize(pred_seg[0, 0, :, :], dsize) if len(pred_seg.shape) == 4 else cv2.resize(pred_seg[0, :, :], dsize)
 
             predictions.append(prediction)
             ground_truths.append(is_pos)
             res.append((prediction, None, None, is_pos, sample_name[0]))
 
             pred_seg_upsampled = pred_seg_upsampled[0][0]
-            seg_mask_original = seg_mask_original.numpy()[0][0]
+            seg_mask_original = seg_mask_original[0][0]
             predicted_segs.append(pred_seg_upsampled)
             if is_pos:
                 predicted_segs_pos.append(pred_seg_upsampled)
@@ -272,9 +259,9 @@ class End2End:
                 if save_images:
                     if self.cfg.WEIGHTED_SEG_LOSS:
                         #seg_loss_mask = cv2.resize(seg_loss_mask.numpy()[0, 0, :, :], dsize)
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_loss_mask_original.numpy()[0][0], save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg_upsampled, seg_loss_mask_original.numpy()[0][0], save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
                     else:
-                        utils.plot_sample(sample_name[0], image, pred_seg, seg_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
+                        utils.plot_sample(sample_name[0], image, pred_seg_upsampled, seg_mask_original, save_folder, pred_seg_upsampled, decision=prediction, plot_seg=plot_seg)
 
         if is_validation:
             # Računanje dice thresholda

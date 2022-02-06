@@ -32,18 +32,6 @@ def _conv_block(in_chanels, out_chanels, kernel_size, padding):
                          FeatureNorm(num_features=out_chanels, eps=0.001),
                          nn.ReLU())
 
-# Blok dekonvolucije - poveča resolucija za 2x (stride=2), output_padding postavljen na 1 (Additional size added to one side of each dimension in the output shape)
-def _deconv_block(in_channels, out_channels, kernel_size, padding, stride=2, output_padding=1, is_last_block=False):
-    if is_last_block:
-        return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
-                                                kernel_size=kernel_size, padding=padding, stride=stride, output_padding=output_padding, bias=False),
-                                                FeatureNorm(num_features=out_channels, eps=0.001))
-    else:
-        return nn.Sequential(nn.ConvTranspose2d(in_channels=in_channels, out_channels=out_channels,
-                                                kernel_size=kernel_size, padding=padding, stride=stride, output_padding=output_padding, bias=False),
-                                                FeatureNorm(num_features=out_channels, eps=0.001),
-                                                nn.ReLU())
-
 class FeatureNorm(nn.Module):
     def __init__(self, num_features, feature_index=1, rank=4, reduce_dims=(2, 3), eps=0.001, include_bias=True):
         super(FeatureNorm, self).__init__()
@@ -78,16 +66,13 @@ class UpSampling(nn.Module):
                 self.conv.add_module(f'conv_block_{i+1}', _conv_block(out_channels, out_channels, kernel_size, padding))
 
     def forward(self, x1, x2):
-        # x1.shape = torch.Size([1, 1024, 56, 56])
-        # x2.shape = torch.Size([1, 64, 112, 112])
-        x1 = self.upsample(x1) # = torch.Size([1, 64, 125, 125])
-        diffY = x2.size()[2] - x1.size()[2] # = -13
-        diffX = x2.size()[3] - x1.size()[3] # = -13
-        x1 = F.pad(x1, (diffX // 2, diffX - diffX//2, diffY // 2, diffY - diffY//2)) # = torch.Size([1, 64, 112, 112])
-        # x1.shape = torch.Size([1, 64, 112, 112])
+        x1 = self.upsample(x1)
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+        x1 = F.pad(x1, (diffX // 2, diffX - diffX//2, diffY // 2, diffY - diffY//2))
 
-        x = torch.cat([x2, x1], dim=1) # x.shape = torch.Size([1, 128, 112, 112])
-        x = self.conv(x) # x.shape = torch.Size([1, 64, 112, 112])
+        x = torch.cat([x2, x1], dim=1)
+        x = self.conv(x)
         return x
 
 class DownSampling(nn.Module):
@@ -123,12 +108,8 @@ class SegDecNet(nn.Module):
         self.volume3 = DownSampling(pooling=True, n_conv_blocks=4, in_channels=64, out_channels=64, kernel_size=5, padding=2)
         self.volume4 = DownSampling(pooling=True, n_conv_blocks=1, in_channels=64, out_channels=1024, kernel_size=15, padding=7)
 
-        self.seg_mask = nn.Sequential(
-            Conv2d_init(in_channels=1024, out_channels=1, kernel_size=1, padding=0, bias=False),
-            FeatureNorm(num_features=1, eps=0.001, include_bias=False))
-
         self.extractor = nn.Sequential(nn.MaxPool2d(kernel_size=2),
-                                       _conv_block(in_chanels=1025, out_chanels=8, kernel_size=5, padding=2),
+                                       _conv_block(in_chanels=1024, out_chanels=8, kernel_size=5, padding=2),
                                        nn.MaxPool2d(kernel_size=2),
                                        _conv_block(in_chanels=8, out_chanels=16, kernel_size=5, padding=2),
                                        nn.MaxPool2d(kernel_size=2),
@@ -170,19 +151,13 @@ class SegDecNet(nn.Module):
         seg_mask_upsampled = self.upsampling3(seg_mask_upsampled, v1)
         seg_mask_upsampled = self.upsampling4(seg_mask_upsampled)
 
-        volume = v4 # torch.Size([1, 1024, 56, 56])
-        seg_mask = self.seg_mask(v4) # torch.Size([1, 1, 56, 56])
-        
-        # Concatenation on dimension 1
-        cat = torch.cat([volume, seg_mask], dim=1) # torch.Size([1, 1025, 56, 56])
+        volume = self.volume_lr_multiplier_layer(v4, self.volume_lr_multiplier_mask)
 
-        cat = self.volume_lr_multiplier_layer(cat, self.volume_lr_multiplier_mask) # torch.Size([1, 1025, 56, 56])
-
-        features = self.extractor(cat) # torch.Size([1, 32, 7, 7])
+        features = self.extractor(volume)
         global_max_feat = torch.max(torch.max(features, dim=-1, keepdim=True)[0], dim=-2, keepdim=True)[0] # torch.Size([1, 32, 1, 1])
         global_avg_feat = torch.mean(features, dim=(-1, -2), keepdim=True) # torch.Size([1, 32, 1, 1])
-        global_max_seg = torch.max(torch.max(seg_mask, dim=-1, keepdim=True)[0], dim=-2, keepdim=True)[0] # torch.Size([1, 1, 1, 1])
-        global_avg_seg = torch.mean(seg_mask, dim=(-1, -2), keepdim=True) # torch.Size([1, 1, 1, 1])
+        global_max_seg = torch.max(torch.max(seg_mask_upsampled, dim=-1, keepdim=True)[0], dim=-2, keepdim=True)[0] # torch.Size([1, 1, 1, 1])
+        global_avg_seg = torch.mean(seg_mask_upsampled, dim=(-1, -2), keepdim=True) # torch.Size([1, 1, 1, 1])
 
         global_max_feat = global_max_feat.reshape(global_max_feat.size(0), -1) # torch.Size([1, 32])
         global_avg_feat = global_avg_feat.reshape(global_avg_feat.size(0), -1) # torch.Size([1, 32])
@@ -195,7 +170,7 @@ class SegDecNet(nn.Module):
         fc_in = torch.cat([global_max_feat, global_avg_feat, global_max_seg, global_avg_seg], dim=1) # torch.Size([1, 66])
         fc_in = fc_in.reshape(fc_in.size(0), -1) # torch.Size([1, 66])
         prediction = self.fc(fc_in) # torch.Size([1, 1])
-        return prediction, seg_mask, seg_mask_upsampled
+        return prediction, seg_mask_upsampled
 
 
 class GradientMultiplyLayer(torch.autograd.Function):
