@@ -310,7 +310,7 @@ class End2End:
         total_epochs = float(self.cfg.EPOCHS)
 
         if self.cfg.DYN_BALANCED_LOSS:
-            seg_loss_weight = 1 - (epoch / total_epochs)
+            seg_loss_weight = 1 - ((epoch / total_epochs) / 2)
             dec_loss_weight = self.cfg.DELTA_CLS_LOSS * (epoch / total_epochs)
         else:
             seg_loss_weight = 1
